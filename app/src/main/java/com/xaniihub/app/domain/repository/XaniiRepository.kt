@@ -36,5 +36,12 @@ interface XaniiRepository {
     suspend fun saveWeight(weightKg: Float)
     suspend fun getTrackingSnapshot(): TrackingSnapshot
 
-    suspend fun ingestSensorTotal(total: Float, cadence: Float)
+    /**
+     * Ingests a raw TYPE_STEP_COUNTER reading.
+     *
+     * @param total steps counted by the sensor since the last reboot.
+     * @param eventTimeMillis wall clock time of the reading; cadence and the day the steps
+     * belong to are derived from it together with the previously stored reading.
+     */
+    suspend fun ingestSensorTotal(total: Float, eventTimeMillis: Long)
 }

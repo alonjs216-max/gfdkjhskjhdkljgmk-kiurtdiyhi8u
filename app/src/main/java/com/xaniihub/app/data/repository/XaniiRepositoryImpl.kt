@@ -14,7 +14,6 @@ import com.xaniihub.app.data.local.entity.WeightEntryEntity
 import com.xaniihub.app.domain.model.Achievement
 import com.xaniihub.app.domain.model.ChallengeMetric
 import com.xaniihub.app.domain.model.CustomChallenge
-import com.xaniihub.app.domain.model.ActivityKind
 import com.xaniihub.app.domain.model.AnalyticsOverview
 import com.xaniihub.app.domain.model.BodyParams
 import com.xaniihub.app.domain.model.DailyPoint
@@ -29,6 +28,7 @@ import com.xaniihub.app.domain.repository.XaniiRepository
 import com.xaniihub.app.tracking.TrackingConstants
 import com.xaniihub.app.widget.RingWalkWidgets
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
@@ -71,13 +71,16 @@ class XaniiRepositoryImpl @Inject constructor(
 
     private fun observeCurrentDate(): Flow<LocalDate> = flow {
         while (true) {
-            val today = LocalDate.now()
-            emit(today)
-            val nextMidnight = today.plusDays(1)
+            emit(LocalDate.now())
+            // Sleeping straight through to midnight in one delay misses time zone changes and
+            // manual clock edits, and drifts in Doze, so poll at least once a minute. The
+            // downstream distinctUntilChanged keeps this from re-emitting the same date.
+            val nextMidnight = LocalDate.now()
+                .plusDays(1)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli()
-            delay((nextMidnight - System.currentTimeMillis()).coerceAtLeast(1_000L))
+            delay((nextMidnight - System.currentTimeMillis()).coerceIn(1_000L, DATE_REFRESH_INTERVAL_MS))
         }
     }.distinctUntilChanged()
 
@@ -90,7 +93,7 @@ class XaniiRepositoryImpl @Inject constructor(
             stepDao.observeAllSummaries(),
             stepDao.observeEventsForDay(dateEpoch)
         ) { day, goal, lifetime, recent, events ->
-            val goalValue = goal?.daily ?: 8_000
+            val goalValue = goal?.daily ?: DEFAULT_DAILY_GOAL
             val summary = day ?: DailySummaryEntity(
                 dateEpochDay = dateEpoch,
                 steps = 0,
@@ -108,11 +111,7 @@ class XaniiRepositoryImpl @Inject constructor(
                 activeMinutes = summary.activeMinutes,
                 streakDays = streak,
                 lifetimeSteps = lifetime,
-                hourlySteps = events.groupBy { event ->
-                    java.time.Instant.ofEpochMilli(event.timestamp)
-                        .atZone(java.time.ZoneId.systemDefault())
-                        .hour
-                }.let { grouped -> List(24) { hour -> grouped[hour]?.sumOf { it.stepsDelta } ?: 0 } }
+                hourlySteps = hourlyStepsOf(date, events)
             )
         }
     }
@@ -120,9 +119,9 @@ class XaniiRepositoryImpl @Inject constructor(
     override suspend fun setDailyGoal(goal: Int) {
         val normalized = goal.coerceIn(1_000, 100_000)
         val existing = goalDao.observeGoal().first() ?: GoalEntity(
-            daily = 8_000,
-            weekly = 56_000,
-            monthly = 240_000
+            daily = DEFAULT_DAILY_GOAL,
+            weekly = DEFAULT_WEEKLY_GOAL,
+            monthly = DEFAULT_MONTHLY_GOAL
         )
         goalDao.upsert(existing.copy(daily = normalized))
         context.getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE)
@@ -154,9 +153,9 @@ class XaniiRepositoryImpl @Inject constructor(
     override fun observeGoalConfig(): Flow<GoalConfig> =
         goalDao.observeGoal().map { goal ->
             GoalConfig(
-                daily = goal?.daily ?: 8_000,
-                weekly = goal?.weekly ?: 56_000,
-                monthly = goal?.monthly ?: 240_000
+                daily = goal?.daily ?: DEFAULT_DAILY_GOAL,
+                weekly = goal?.weekly ?: DEFAULT_WEEKLY_GOAL,
+                monthly = goal?.monthly ?: DEFAULT_MONTHLY_GOAL
             )
         }
 
@@ -259,9 +258,7 @@ class XaniiRepositoryImpl @Inject constructor(
                 stepDao.observeRange(today.minusDays(1).toEpochDay(), today.toEpochDay()),
                 stepDao.observeRange(weekStart.toEpochDay(), today.toEpochDay())
             ) { todayEvents, twoDaySummaries, weekSummaries ->
-                val morningSteps = todayEvents
-                    .filter { java.time.Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).hour < 12 }
-                    .sumOf { it.stepsDelta }
+                val morningSteps = hourlyStepsOf(today, todayEvents).take(12).sum()
                 listOf(
                     MiniChallenge(1, "morning_boost", "morning_boost_desc", 3_000, morningSteps),
                     MiniChallenge(2, "evening_streak", "evening_streak_desc", 16_000, twoDaySummaries.sumOf { it.steps }),
@@ -325,64 +322,210 @@ class XaniiRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun ingestSensorTotal(total: Float, cadence: Float) {
+    override suspend fun ingestSensorTotal(total: Float, eventTimeMillis: Long) {
+        if (!total.isFinite()) return
         withContext(Dispatchers.IO) {
             ingestMutex.withLock {
-            val today = LocalDate.now()
-            val todayEpoch = today.toEpochDay()
-            val current = stepDao.getDay(todayEpoch)
-            val absoluteCounter = total.toInt().coerceAtLeast(0)
-            val prefs = context.getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE)
-            val previousDate = prefs.getLong(TrackingConstants.PREF_COUNTER_DATE, Long.MIN_VALUE)
-            val previousCounter = prefs.getInt(TrackingConstants.PREF_REPOSITORY_COUNTER, -1)
-            val delta = when {
-                previousCounter < 0 || previousDate != todayEpoch -> 0
-                absoluteCounter >= previousCounter -> absoluteCounter - previousCounter
-                else -> 0 // Hardware reset: establish a new baseline without a spike.
-            }
-            prefs.edit()
-                .putInt(TrackingConstants.PREF_REPOSITORY_COUNTER, absoluteCounter)
-                .putLong(TrackingConstants.PREF_COUNTER_DATE, todayEpoch)
-                .apply()
+                val prefs = context.getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE)
+                val counter = total.coerceAtLeast(0f)
+                val previousCounter = prefs.getFloat(TrackingConstants.PREF_LAST_SENSOR_COUNTER, -1f)
+                val previousEventTime = prefs.getLong(TrackingConstants.PREF_LAST_SENSOR_EVENT_TIME, 0L)
+                val eventTime = if (eventTimeMillis > 0L) eventTimeMillis else System.currentTimeMillis()
 
-            val newSteps = (current?.steps ?: 0) + delta
-            val body = bodyDao.observeBodyParams().first()
-            val weightKg = body?.weightKg ?: 70f
-            val heightCm = body?.heightCm ?: 175
-            val strideKm = StepCalorieCalculator.strideKm(heightCm, cadence)
-            val distance = (current?.distanceKm ?: 0f) + delta * strideKm
-            val calories = (current?.calories ?: 0f) + estimateCalories(
-                steps = delta,
-                weightKg = weightKg,
-                heightCm = heightCm,
-                cadence = cadence
-            )
+                // TYPE_STEP_COUNTER keeps counting while this process is dead, so the difference
+                // between two readings is exactly what still has to be recorded - including the
+                // steps taken while the service was restarting or the day was rolling over.
+                val delta = when {
+                    previousCounter < 0f -> 0 // First reading ever: only establish the baseline.
+                    counter >= previousCounter -> (counter - previousCounter).toInt()
+                    eventTime >= previousEventTime -> counter.toInt() // Counter restarted after a reboot.
+                    else -> 0 // Out of order reading: ignore it.
+                }.coerceIn(0, MAX_PLAUSIBLE_DELTA)
 
-            stepDao.insertEvent(
-                StepEventEntity(
-                    timestamp = System.currentTimeMillis(),
-                    dateEpochDay = todayEpoch,
-                    stepsDelta = delta,
-                    totalCounter = total,
-                    cadence = cadence,
-                    activityKind = StepCalorieCalculator.activityKind(cadence).name
-                )
-            )
-            val activeMinutes = stepDao.countActiveMinutesForDay(todayEpoch)
+                prefs.edit()
+                    .putFloat(TrackingConstants.PREF_LAST_SENSOR_COUNTER, counter)
+                    .putLong(TrackingConstants.PREF_LAST_SENSOR_EVENT_TIME, eventTime)
+                    .apply()
 
-            stepDao.upsertDailySummary(
-                DailySummaryEntity(
-                    dateEpochDay = todayEpoch,
-                    steps = newSteps,
-                    distanceKm = distance,
-                    calories = calories,
-                    activeMinutes = activeMinutes
-                )
-            )
+                if (delta <= 0) return@withLock
+
+                val cadence = cadenceOf(previousEventTime, eventTime, delta)
+                val body = bodyDao.observeBodyParams().first()
+                val weightKg = body?.weightKg ?: DEFAULT_WEIGHT_KG
+                val heightCm = body?.heightCm ?: DEFAULT_HEIGHT_CM
+                val strideKm = StepCalorieCalculator.strideKm(heightCm, cadence)
+                val activityKind = StepCalorieCalculator.activityKind(cadence).name
+
+                splitAcrossDays(previousEventTime, eventTime, delta).forEach { segment ->
+                    stepDao.insertEvent(
+                        StepEventEntity(
+                            timestamp = segment.timestamp,
+                            dateEpochDay = segment.dateEpochDay,
+                            stepsDelta = segment.steps,
+                            totalCounter = total,
+                            cadence = cadence,
+                            activityKind = activityKind
+                        )
+                    )
+                    val current = stepDao.getDay(segment.dateEpochDay)
+                    stepDao.upsertDailySummary(
+                        DailySummaryEntity(
+                            dateEpochDay = segment.dateEpochDay,
+                            steps = (current?.steps ?: 0) + segment.steps,
+                            distanceKm = (current?.distanceKm ?: 0f) + segment.steps * strideKm,
+                            calories = (current?.calories ?: 0f) + estimateCalories(
+                                steps = segment.steps,
+                                weightKg = weightKg,
+                                heightCm = heightCm,
+                                cadence = cadence
+                            ),
+                            activeMinutes = ((current?.activeMinutes ?: 0) + activeMinutesOf(segment.steps, segment.durationMs))
+                                .coerceAtMost(MINUTES_PER_DAY)
+                        )
+                    )
+                }
             }
         }
     }
 
+    private data class StepSegment(
+        val dateEpochDay: Long,
+        val timestamp: Long,
+        val steps: Int,
+        val durationMs: Long
+    )
+
+    /**
+     * Splits [steps] over the calendar days between [previousEventTime] and [eventTime].
+     * A single reading can cover midnight, because the sensor counts on its own while the app is
+     * not running - those steps used to be dropped or credited to the wrong day.
+     */
+    private fun splitAcrossDays(previousEventTime: Long, eventTime: Long, steps: Int): List<StepSegment> {
+        val zone = ZoneId.systemDefault()
+        val eventDay = Instant.ofEpochMilli(eventTime).atZone(zone).toLocalDate()
+        val gapMs = if (previousEventTime in 1L until eventTime) eventTime - previousEventTime else 0L
+        val single = listOf(
+            StepSegment(
+                dateEpochDay = eventDay.toEpochDay(),
+                timestamp = eventTime,
+                steps = steps,
+                durationMs = gapMs
+            )
+        )
+        if (gapMs !in 1L..MAX_SPLIT_WINDOW_MS) return single
+        val startDay = Instant.ofEpochMilli(previousEventTime).atZone(zone).toLocalDate()
+        if (startDay == eventDay) return single
+
+        val covered = mutableListOf<Pair<Long, Long>>()
+        var cursorTime = previousEventTime
+        var cursorDay = startDay
+        while (cursorTime < eventTime && covered.size < MAX_SPLIT_SEGMENTS) {
+            val nextMidnight = cursorDay.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            val segmentEnd = minOf(nextMidnight, eventTime)
+            if (segmentEnd <= cursorTime) break
+            covered += cursorDay.toEpochDay() to (segmentEnd - cursorTime)
+            cursorTime = segmentEnd
+            cursorDay = cursorDay.plusDays(1)
+        }
+        if (covered.isEmpty() || cursorTime < eventTime) return single
+
+        val totalMs = covered.sumOf { it.second }.coerceAtLeast(1L)
+        val segments = mutableListOf<StepSegment>()
+        var assigned = 0
+        covered.forEachIndexed { index, entry ->
+            val day = entry.first
+            val durationMs = entry.second
+            val portion = if (index == covered.lastIndex) {
+                steps - assigned
+            } else {
+                ((steps.toLong() * durationMs) / totalMs).toInt()
+            }
+            assigned += portion
+            if (portion > 0) {
+                val timestamp = if (index == covered.lastIndex) {
+                    eventTime
+                } else {
+                    LocalDate.ofEpochDay(day).plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1
+                }
+                segments += StepSegment(day, timestamp, portion, durationMs)
+            }
+        }
+        return if (segments.isEmpty()) single else segments
+    }
+
+    /**
+     * Cadence of a reading, derived from the interval it covers. The service used to accumulate
+     * this in memory, which reset to 0 on every restart and distorted calories and distance.
+     */
+    private fun cadenceOf(previousEventTime: Long, eventTime: Long, steps: Int): Float {
+        if (previousEventTime <= 0L || eventTime <= previousEventTime || steps <= 0) return 0f
+        val elapsedMs = eventTime - previousEventTime
+        if (elapsedMs < MIN_CADENCE_WINDOW_MS || elapsedMs > MAX_CADENCE_WINDOW_MS) return 0f
+        return (steps * 60_000f / elapsedMs).coerceIn(0f, MAX_CADENCE)
+    }
+
+    /**
+     * Active minutes contributed by one reading. Counting distinct minute buckets of the event
+     * timestamps (the previous SQL approach) turned every single reading into a full active
+     * minute, so a handful of steps could add tens of minutes of "activity".
+     */
+    private fun activeMinutesOf(steps: Int, durationMs: Long): Int {
+        if (steps <= 0) return 0
+        val plausibleMinutes = ceilDiv(steps.toLong(), STEPS_PER_ACTIVE_MINUTE)
+        val coveredMinutes = if (durationMs > 0L) ceilDiv(durationMs, 60_000L) else plausibleMinutes
+        return minOf(plausibleMinutes, coveredMinutes)
+            .coerceIn(1L, MINUTES_PER_DAY.toLong())
+            .toInt()
+    }
+
+    /**
+     * Steps per hour of [date]. Readings arrive batched, so charting the whole delta at the
+     * timestamp of the reading produced spikes in the wrong hour; spread each reading over the
+     * window it actually covers instead.
+     */
+    private fun hourlyStepsOf(date: LocalDate, events: List<StepEventEntity>): List<Int> {
+        val dayStart = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val buckets = IntArray(24)
+        var previousTimestamp = 0L
+        events.sortedBy { it.timestamp }.forEach { event ->
+            if (event.stepsDelta > 0) {
+                val plausibleMs = ceilDiv(event.stepsDelta.toLong(), STEPS_PER_ACTIVE_MINUTE) * 60_000L
+                val gapMs = if (previousTimestamp in 1L until event.timestamp) {
+                    event.timestamp - previousTimestamp
+                } else {
+                    plausibleMs
+                }
+                spreadSteps(
+                    buckets = buckets,
+                    dayStart = dayStart,
+                    start = event.timestamp - minOf(plausibleMs, gapMs),
+                    end = event.timestamp,
+                    steps = event.stepsDelta
+                )
+            }
+            previousTimestamp = maxOf(previousTimestamp, event.timestamp)
+        }
+        return buckets.toList()
+    }
+
+    private fun spreadSteps(buckets: IntArray, dayStart: Long, start: Long, end: Long, steps: Int) {
+        val firstMinute = ((start - dayStart) / 60_000L).coerceIn(0L, LAST_MINUTE_OF_DAY)
+        val lastMinute = ((end - dayStart) / 60_000L).coerceIn(firstMinute, LAST_MINUTE_OF_DAY)
+        val minuteCount = (lastMinute - firstMinute + 1L).toInt()
+        val perMinute = steps / minuteCount
+        var remainder = steps - perMinute * minuteCount
+        for (minute in firstMinute..lastMinute) {
+            var value = perMinute
+            if (remainder > 0) {
+                value++
+                remainder--
+            }
+            buckets[(minute / 60L).toInt().coerceIn(0, 23)] += value
+        }
+    }
+
+    private fun ceilDiv(value: Long, divisor: Long): Long =
+        if (value <= 0L || divisor <= 0L) 0L else (value + divisor - 1L) / divisor
 
     private fun estimateCalories(steps: Int, weightKg: Float, heightCm: Int, cadence: Float): Float =
         StepCalorieCalculator.estimate(steps, weightKg, heightCm, cadence)
@@ -452,4 +595,21 @@ class XaniiRepositoryImpl @Inject constructor(
         gamificationDao.deleteCustomChallenge(id)
     }
 
+    private companion object {
+        const val DEFAULT_DAILY_GOAL = 8_000
+        const val DEFAULT_WEEKLY_GOAL = 56_000
+        const val DEFAULT_MONTHLY_GOAL = 240_000
+        const val DEFAULT_WEIGHT_KG = 70f
+        const val DEFAULT_HEIGHT_CM = 175
+        const val MAX_PLAUSIBLE_DELTA = 50_000
+        const val MAX_SPLIT_WINDOW_MS = 24L * 60L * 60L * 1_000L
+        const val MAX_SPLIT_SEGMENTS = 4
+        const val MIN_CADENCE_WINDOW_MS = 5_000L
+        const val MAX_CADENCE_WINDOW_MS = 5L * 60L * 1_000L
+        const val MAX_CADENCE = 220f
+        const val STEPS_PER_ACTIVE_MINUTE = 100L
+        const val MINUTES_PER_DAY = 1_440
+        const val LAST_MINUTE_OF_DAY = 1_439L
+        const val DATE_REFRESH_INTERVAL_MS = 60_000L
+    }
 }
