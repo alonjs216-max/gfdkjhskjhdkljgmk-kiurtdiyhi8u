@@ -60,7 +60,9 @@ class InactivityWorker @AssistedInject constructor(
         ensureChannel()
         val previous = prefs.getInt(PREF_LAST_CHECK_STEPS, latest)
         val increase = (latest - previous).coerceAtLeast(0)
-        if (increase < MIN_STEPS_PER_WINDOW) {
+        // Without a running tracker there are no step updates at all, so "no new steps" is not
+        // inactivity - it used to nag the user every two hours while tracking was stopped.
+        if (increase < MIN_STEPS_PER_WINDOW && isTrackingRunning()) {
             notifyInactivity()
         }
         prefs.edit()
@@ -68,6 +70,17 @@ class InactivityWorker @AssistedInject constructor(
             .putString(PREF_LAST_CHECK_DATE, today)
             .apply()
         return Result.success()
+    }
+
+    /**
+     * The tracking service keeps its ongoing foreground notification posted for as long as it
+     * runs, which makes it a reliable signal for "steps are actually being collected right now".
+     */
+    private fun isTrackingRunning(): Boolean {
+        val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        return runCatching {
+            manager.activeNotifications.any { it.id == TrackingConstants.TRACKING_NOTIFICATION_ID }
+        }.getOrDefault(false)
     }
 
     private fun notifyInactivity() {
@@ -89,7 +102,7 @@ class InactivityWorker @AssistedInject constructor(
         )
         val notification = NotificationCompat.Builder(applicationContext, TrackingConstants.INACTIVITY_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_walk_notification)
-            .setContentTitle("RingWalk")
+            .setContentTitle(applicationContext.getString(R.string.app_name))
             .setContentText(appString("inactivity_notification_text"))
             .setContentIntent(contentIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

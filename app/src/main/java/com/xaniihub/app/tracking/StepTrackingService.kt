@@ -7,12 +7,15 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.xaniihub.app.MainActivity
 import com.xaniihub.app.R
@@ -24,11 +27,16 @@ import com.xaniihub.app.widget.RingWalkWidgets
 import com.xaniihub.app.widget.WidgetSnapshot
 import com.xaniihub.app.widget.WidgetTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,29 +48,24 @@ class StepTrackingService : Service(), SensorEventListener {
     lateinit var repository: XaniiRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val sensorIngestMutex = Mutex()
+    private val ingestMutex = Mutex()
     private var sensorManager: SensorManager? = null
     private var stepSensor: Sensor? = null
-    private var latestStepCounter = 0
-    private var lastEventTime = 0L
-    private var cadenceWindowStartTime = 0L
-    private var cadenceWindowSteps = 0
-    private var latestCadence = 0f
+    private var listenerRegistered = false
+    private var publishedDay = Long.MIN_VALUE
+    private var dateJob: Job? = null
 
     override fun onCreate() {
         super.onCreate()
-        // Restore the last known raw sensor counter so cadence isn't computed against 0
-        // after a mid-day service restart (which would otherwise treat the first reading
-        // as a huge step delta / spike).
-        getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE).also { preferences ->
-            latestStepCounter = preferences.getInt(TrackingConstants.PREF_LATEST_COUNTER, 0)
-            lastEventTime = preferences.getLong(TrackingConstants.PREF_LAST_SENSOR_EVENT_TIME, 0L)
-        }
         createChannels()
         val started = runCatching {
-            startForeground(
+            // The manifest declares the health foreground service type, and Android 14+ rejects
+            // startForeground() unless the same type is passed here.
+            ServiceCompat.startForeground(
+                this,
                 TrackingConstants.TRACKING_NOTIFICATION_ID,
-                buildFallbackNotification(TrackingSnapshot(0, 0, 0, 0))
+                buildFallbackNotification(TrackingSnapshot(0, 0, 0, 0)),
+                foregroundServiceType()
             )
         }.isSuccess
         if (!started) {
@@ -75,14 +78,23 @@ class StepTrackingService : Service(), SensorEventListener {
             stopSelf()
             return
         }
-        sensorManager?.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        registerSensorListener()
+        // Show today's real numbers immediately instead of the empty placeholder notification.
+        scope.launch { ingestMutex.withLock { runCatching { publishSnapshot() } } }
+        startDateWatcher()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // onStartCommand also runs for an already running service (boot receiver, app update,
+        // sticky restart), so make sure the sensor listener is attached in those cases too -
+        // otherwise the foreground notification stays up while nothing is being counted.
+        registerSensorListener()
         return START_STICKY
     }
 
     override fun onDestroy() {
+        dateJob?.cancel()
+        listenerRegistered = false
         sensorManager?.unregisterListener(this)
         scope.cancel()
         super.onDestroy()
@@ -93,41 +105,76 @@ class StepTrackingService : Service(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type != Sensor.TYPE_STEP_COUNTER) return
         val total = event.values.firstOrNull() ?: return
-        val now = System.currentTimeMillis()
-        val previousCounter = latestStepCounter
-        val stepDelta = (total.toInt() - previousCounter).coerceAtLeast(0)
-        if (cadenceWindowStartTime == 0L) {
-            cadenceWindowStartTime = lastEventTime.takeIf { now - it <= 60_000L } ?: now
-        }
-        cadenceWindowSteps += stepDelta
-        val windowElapsedMs = now - cadenceWindowStartTime
-        if (windowElapsedMs >= 60_000L) {
-            latestCadence = cadenceWindowSteps / (windowElapsedMs / 60_000f)
-            cadenceWindowStartTime = now
-            cadenceWindowSteps = 0
-        }
-        latestStepCounter = total.toInt()
-        lastEventTime = now
-        val cadence = latestCadence
+        val eventTime = System.currentTimeMillis()
         scope.launch {
-            sensorIngestMutex.withLock {
-                repository.ingestSensorTotal(total, cadence)
-                val snapshot = repository.getTrackingSnapshot()
-                saveTrackingState(latestStepCounter, lastEventTime, snapshot.steps)
-                updateForegroundNotification(snapshot)
-                RingWalkWidgets.publish(
-                    context = this@StepTrackingService,
-                    steps = snapshot.steps,
-                    goal = readDailyGoal(),
-                    calories = snapshot.calories,
-                    distanceMeters = snapshot.distanceMeters,
-                    activeMinutes = snapshot.activeMinutes
-                )
+            ingestMutex.withLock {
+                runCatching {
+                    // The step delta and the cadence are derived inside the repository, which is
+                    // the only place that persists the previous reading: a service restart can no
+                    // longer reset that state and lose steps or fake a spike.
+                    repository.ingestSensorTotal(total, eventTime)
+                    publishSnapshot()
+                }
             }
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    private fun registerSensorListener() {
+        if (listenerRegistered) return
+        val manager = sensorManager ?: return
+        val sensor = stepSensor ?: return
+        listenerRegistered = manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    private fun foregroundServiceType(): Int =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+        } else {
+            0
+        }
+
+    /**
+     * The step counter is an on-change sensor, so nothing repaints the notification, the tile and
+     * the widgets when the day rolls over while the user is not walking - they used to keep
+     * showing yesterday's total until the next step.
+     */
+    private fun startDateWatcher() {
+        dateJob?.cancel()
+        dateJob = scope.launch {
+            while (isActive) {
+                delay(millisUntilDateCheck())
+                if (LocalDate.now().toEpochDay() != publishedDay) {
+                    ingestMutex.withLock { runCatching { publishSnapshot() } }
+                }
+            }
+        }
+    }
+
+    private fun millisUntilDateCheck(): Long {
+        val nextMidnight = LocalDate.now()
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        return (nextMidnight - System.currentTimeMillis()).coerceIn(1_000L, DATE_CHECK_INTERVAL_MS)
+    }
+
+    /** Must be called while holding [ingestMutex]; the mutex is not reentrant. */
+    private suspend fun publishSnapshot() {
+        val snapshot = repository.getTrackingSnapshot()
+        updateForegroundNotification(snapshot)
+        RingWalkWidgets.publish(
+            context = this,
+            steps = snapshot.steps,
+            goal = readDailyGoal(),
+            calories = snapshot.calories,
+            distanceMeters = snapshot.distanceMeters,
+            activeMinutes = snapshot.activeMinutes
+        )
+        publishedDay = LocalDate.now().toEpochDay()
+    }
 
     private fun updateForegroundNotification(snapshot: TrackingSnapshot) {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -197,16 +244,6 @@ class StepTrackingService : Service(), SensorEventListener {
         manager.createNotificationChannel(inactivity)
     }
 
-    private fun saveTrackingState(counter: Int, eventTime: Long, steps: Int) {
-        getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putInt(TrackingConstants.PREF_LATEST_COUNTER, counter)
-            .putLong(TrackingConstants.PREF_LAST_SENSOR_EVENT_TIME, eventTime)
-            .putInt(TrackingConstants.PREF_LATEST_STEPS, steps)
-            .putLong(TrackingConstants.PREF_LATEST_STEPS_DATE, java.time.LocalDate.now().toEpochDay())
-            .apply()
-    }
-
     private fun readDailyGoal(): Int {
         return getSharedPreferences(TrackingConstants.PREFS_NAME, Context.MODE_PRIVATE)
             .getInt(TrackingConstants.PREF_DAILY_GOAL, 8_000)
@@ -216,6 +253,8 @@ class StepTrackingService : Service(), SensorEventListener {
         java.text.NumberFormat.getIntegerInstance(appLocale()).format(value)
 
     companion object {
+        private const val DATE_CHECK_INTERVAL_MS = 60_000L
+
         fun start(context: Context) {
             val intent = Intent(context, StepTrackingService::class.java)
             runCatching {
