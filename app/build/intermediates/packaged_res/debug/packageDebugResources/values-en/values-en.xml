@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RingWalk</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_profile">Profile</string>
+    <string name="notification_calories_label">kcal</string>
+    <string name="notification_distance_label">m</string>
+    <string name="notification_minutes_label">min</string>
+    <string name="notification_steps_label">steps</string>
+    <string name="tile_label">Steps</string>
+    <string name="tracking_notification_channel">RingWalk Tracking</string>
+    <string name="tracking_notification_title">RingWalk is running in background</string>
+    <string name="widget_desc_compact">Compact strip: steps, calories and goal percent</string>
+    <string name="widget_desc_stats">Metrics board: steps, calories, distance and time</string>
+    <string name="widget_desc_steps">Goal ring: steps, progress and daily metrics</string>
+    <string name="widget_desc_week">7-day chart, daily average and streak</string>
+    <string name="widget_goal_default">Goal 8,000</string>
+    <string name="widget_streak_label">streak</string>
+    <string name="widget_title">Steps today</string>
+    <string name="widget_week_title">Last 7 days</string>
+    <string name="widget_zero">0</string>
+</resources>

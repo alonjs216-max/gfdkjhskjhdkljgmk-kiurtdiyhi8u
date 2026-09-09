@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.7.2" type="partial_results">
+    <map id="AppBundleLocaleChanges">
+        <entry
+            name="bundleLanguageSplittingDisabled"
+            boolean="true"/>
+        <location id="localeChangeLocation"
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/ui/XaniiHubRoot.kt"
+            line="203"
+            column="13"
+            startOffset="8241"
+            endLine="203"
+            endColumn="43"
+            endOffset="8271"/>
+    </map>
+    <map id="NotificationPermission">
+        <entry
+            name="source"
+            boolean="true"/>
+    </map>
+    <map id="UnsafeImplicitIntentLaunch">
+            <map id="actionsSent">
+                    <map id="android.settings.APPLICATION_DETAILS_SETTINGS (used to start an activity)">
+                        <location id="0"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+                            line="331"
+                            column="29"
+                            startOffset="12976"
+                            endLine="331"
+                            endColumn="81"
+                            endOffset="13028"/>
+                    </map>
+            </map>
+    </map>
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="com.xaniihub.app.MainActivity"
+                    boolean="true"/>
+                <entry
+                    name="com.xaniihub.app.receiver.BootReceiver"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="UnusedResources">
+        <location id="R.color.launcher_fg"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/colors.xml"
+            line="4"
+            column="12"
+            startOffset="108"
+            endLine="4"
+            endColumn="30"
+            endOffset="126"/>
+        <location id="R.drawable.bg_notification_dot"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/bg_notification_dot.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="4"
+            endColumn="9"
+            endOffset="175"/>
+        <location id="R.drawable.bg_notification_ring"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/bg_notification_ring.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="7"
+            endColumn="9"
+            endOffset="252"/>
+        <location id="R.drawable.ic_launcher_foreground"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/ic_launcher_foreground.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="13"
+            endColumn="10"
+            endOffset="517"/>
+        <location id="R.drawable.ringwalk_logo"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable-nodpi/ringwalk_logo.png"/>
+        <location id="R.layout.widget_steps"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps.xml"
+            line="6"
+            column="1"
+            startOffset="175"
+            endLine="49"
+            endColumn="15"
+            endOffset="1724"/>
+        <location id="R.string.tracking_notification_channel"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="7"
+            column="13"
+            startOffset="254"
+            endLine="7"
+            endColumn="49"
+            endOffset="290"/>
+        <location id="R.string.tracking_notification_title"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="8"
+            column="13"
+            startOffset="330"
+            endLine="8"
+            endColumn="47"
+            endOffset="364"/>
+        <entry
+            name="model"
+            string="color[launcher_bg(U),launcher_fg(D)],drawable[ic_tile_steps(U),bg_notification_dot(D),bg_notification_panel(U),bg_notification_ring(D),ic_launcher_foreground(D),ic_walk_notification(U),ringwalk_logo_foreground(U),widget_bg(U),widget_pill_bg(U),widget_tile_bg(U),ringwalk_logo(D)],id[nRingImg(U),nRingText(U),nSteps(U),nStepsLabel(U),nCalories(U),nCaloriesLabel(U),nDistance(U),nDistanceLabel(U),nMinutes(U),nMinutesLabel(U),nDot(U),nTitle(U),nPercentPill(U),nBar(U),nRemaining(U),widget_root(U),widgetRing(U),widgetSteps(U),widgetStepsLabel(U),widgetCalories(U),widgetCaloriesLabel(U),widgetPercent(U),widgetDot(U),widgetTitle(U),widgetDistance(U),widgetDistanceLabel(U),widgetMinutes(U),widgetMinutesLabel(U),widgetBar(U),widgetGoal(U),widgetRemaining(U),widgetStreak(U),widgetStreakLabel(U),widgetWeek(U),widgetWeekTotal(U),widgetWeekAvg(U)],layout[notification_tracking_compact(U),notification_tracking_expanded(U),widget_compact(U),widget_stats(U),widget_steps(D),widget_steps_large(U),widget_steps_medium(U),widget_steps_small(U),widget_week(U)],mipmap[ic_launcher(U),ic_launcher_round(U)],string[app_name(U),tile_label(U),widget_zero(U),notification_steps_label(U),notification_calories_label(U),notification_distance_label(U),notification_minutes_label(U),widget_title(U),widget_goal_default(U),widget_streak_label(U),widget_week_title(U),nav_home(U),nav_analytics(U),nav_profile(U),tracking_notification_channel(D),tracking_notification_title(D),widget_desc_steps(U),widget_desc_compact(U),widget_desc_stats(U),widget_desc_week(U)],style[Theme_XaniiHub(U),Theme_Material3_DayNight_NoActionBar(R)],xml[data_extraction_rules(U),backup_rules(U),steps_widget_info(U),compact_widget_info(U),stats_widget_info(U),week_widget_info(U)];31^4^3e^3f^40^41^42,32^4^43^a^3e^3f^b^40^41^42,33^9^43^3e^3f^40^a,34^9^43^a^b^3e^3f^40^41^42^44,35^9^43^3e,36^9^43^a^3e^3f^b^40^41^42^45^46,37^9^43^3e^a^44,38^9^43^3e,39^9^46^a^3e,3a^0^8,3b^0^8,50^51,54^4c^38^37,55^4d^33,56^4e^34,57^4f^39;;;"/>
+    </map>
+
+</incidents>

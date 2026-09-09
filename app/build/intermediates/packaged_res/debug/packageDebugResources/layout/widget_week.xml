@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="13dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/widgetDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/widgetTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:letterSpacing="0.05"
+            android:maxLines="1"
+            android:text="@string/widget_week_title"
+            android:textColor="#B3FFFFFF"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widgetWeekTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_pill_bg"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingStart="9dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="9dp"
+            android:paddingBottom="3dp"
+            android:text="@string/widget_zero"
+            android:textColor="#FFA78BFA"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/widgetWeek"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/widget_week_title"
+        android:minHeight="44dp"
+        android:scaleType="fitXY" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/widgetWeekAvg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="#8CFFFFFF"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/widgetStreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="#FFFFC857"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

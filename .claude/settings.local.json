@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -name \"*.kt\" -path \"*AnalyticsScreen*\")",
+      "Bash(find . -name \"*.kt\" -path \"*ProfileScreen*\")",
+      "Bash(find . -name \"*.kt\" -path \"*HomeScreen*\")",
+      "Bash(find . -name \"StepTrackingService.kt\" -o -name \"UiComponents.kt\" -o -name \"GoalsScreen.kt\")",
+      "Bash(grep -rl \"GoalRing\" --include=\"*.kt\" .)",
+      "Bash(grep -rl \"class DashboardStats\\\\|data class DashboardStats\" --include=\"*.kt\" .)",
+      "Bash(xargs grep -l \"ingestSensorTotal\\\\|PREF_LATEST_STEPS\")",
+      "Bash(./gradlew :app:compileDebugKotlin -q)",
+      "Bash(./gradlew :app:assembleDebug)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew assembleDebug --no-daemon)",
+      "Bash(./gradlew assembleDebug --no-daemon --stacktrace)",
+      "Bash(java -version)",
+      "Bash(ping -n 1 127.0.0.1)",
+      "Bash(grep -v '^$')",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft Visual Studio/**)",
+      "Bash(g++ --version)",
+      "Read(//d/shit//**)",
+      "Read(//d/shit/mingw32/bin/**)",
+      "Read(//c/Users/Administrator/Desktop/gpt 2.0/**)",
+      "Bash(g++ -m32 /tmp/t.cpp -o /tmp/t.exe)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(/d/shit/usr/bin/pacman -Qs mingw-w64-i686-gcc)",
+      "Bash(/d/shit/usr/bin/pacman.exe -S --noconfirm --needed mingw-w64-i686-gcc)",
+      "Bash(/d/shit/mingw32/bin/g++.exe --version)",
+      "Bash(xargs wc -l)",
+      "Bash(sed -E 's/.*\\\\\\(\"\\(.*\\)\"\\\\\\)/\\\\1/')",
+      "Bash(awk '/^private val ru = mapOf/,/^\\\\\\)/' ui/localization/AppLanguage.kt)",
+      "Bash(awk '/^private val en = mapOf/,/^\\\\\\)/' ui/localization/AppLanguage.kt)",
+      "Bash(awk 'NR!=$1{print \"ПРОПУСК/ДУБЛЬ на позиции \"NR\": \"$1}')"
+    ]
+  }
+}

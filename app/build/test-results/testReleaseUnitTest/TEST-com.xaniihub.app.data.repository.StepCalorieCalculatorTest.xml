@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.xaniihub.app.data.repository.StepCalorieCalculatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-06T14:10:33" hostname="YONEXXU" time="0.007">
+  <properties/>
+  <testcase name="stepsWeightAndHeightAffectEstimate" classname="com.xaniihub.app.data.repository.StepCalorieCalculatorTest" time="0.005"/>
+  <testcase name="invalidCadenceCannotCreateAnomaly" classname="com.xaniihub.app.data.repository.StepCalorieCalculatorTest" time="0.0"/>
+  <testcase name="ordinaryWalkIsARealisticActiveEstimate" classname="com.xaniihub.app.data.repository.StepCalorieCalculatorTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RingWalk</string>
+    <string name="nav_home">Главная</string>
+    <string name="nav_analytics">Аналитика</string>
+    <string name="nav_profile">Профиль</string>
+    <string name="tracking_notification_channel">RingWalk Tracking</string>
+    <string name="tracking_notification_title">RingWalk работает в фоне</string>
+    <string name="notification_steps_label">шаги</string>
+    <string name="notification_calories_label">ккал</string>
+    <string name="notification_distance_label">м</string>
+    <string name="notification_minutes_label">мин</string>
+    <string name="widget_zero">0</string>
+    <string name="widget_title">Шаги сегодня</string>
+    <string name="widget_goal_default">Цель 8 000</string>
+    <string name="widget_week_title">Последние 7 дней</string>
+    <string name="widget_streak_label">серия</string>
+    <string name="widget_desc_steps">Кольцо цели: шаги, прогресс и метрики дня</string>
+    <string name="widget_desc_compact">Компактная полоска: шаги, калории и процент цели</string>
+    <string name="widget_desc_stats">Панель метрик: шаги, калории, дистанция и время</string>
+    <string name="widget_desc_week">График за 7 дней, средний результат и серия</string>
+    <string name="tile_label">Шаги</string>
+</resources>

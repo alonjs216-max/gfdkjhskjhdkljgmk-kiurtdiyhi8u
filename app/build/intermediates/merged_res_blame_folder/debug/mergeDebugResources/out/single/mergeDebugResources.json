@@ -1,0 +1,158 @@
+[
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-hdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_compact.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_compact.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_week_widget_info.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\week_widget_info.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_steps_large.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_steps_large.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xxhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_stats.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_stats.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_compact_widget_info.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\compact_widget_info.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_bg_notification_panel.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\bg_notification_panel.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_steps.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_steps.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable-nodpi_ringwalk_logo.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable-nodpi\\ringwalk_logo.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_notification_tracking_expanded.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\notification_tracking_expanded.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_widget_bg.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\widget_bg.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_steps_medium.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_steps_medium.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_notification_tracking_compact.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\notification_tracking_compact.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_week.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_week.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_widget_tile_bg.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\widget_tile_bg.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_steps_widget_info.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\steps_widget_info.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "com.xaniihub.app-debug-82:/layout_notification_tracking_compact.xml.flat",
+        "source": "com.xaniihub.app-main-84:/layout/notification_tracking_compact.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xxxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\layout_widget_steps_small.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\layout\\widget_steps_small.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_ringwalk_logo_foreground.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\ringwalk_logo_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_ic_tile_steps.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\ic_tile_steps.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_bg_notification_dot.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\bg_notification_dot.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-mdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_stats_widget_info.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\stats_widget_info.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-xxxhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_ic_walk_notification.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\ic_walk_notification.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_widget_pill_bg.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\widget_pill_bg.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\mipmap-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\xml\\data_extraction_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-debug-82:\\drawable_bg_notification_ring.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.9\\com.xaniihub.app-main-84:\\drawable\\bg_notification_ring.xml"
+    }
+]

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Widget panel background.
+
+    Mirrors the "PremiumCard" glass look from the main menu:
+      1. deep, slightly violet base gradient
+      2. two soft aurora blobs (primary top-left, secondary bottom-right)
+      3. a bright top sheen
+      4. a hairline border with a brighter top edge
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1. Deep glass base -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <gradient
+                android:angle="135"
+                android:type="linear"
+                android:startColor="#FF17122C"
+                android:centerColor="#FF0E0A1C"
+                android:endColor="#FF08060F" />
+        </shape>
+    </item>
+
+    <!-- 2a. Aurora blob (primary tint) -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <gradient
+                android:type="radial"
+                android:centerX="0.14"
+                android:centerY="0.02"
+                android:gradientRadius="120%p"
+                android:startColor="#5CA78BFA"
+                android:endColor="#00A78BFA" />
+        </shape>
+    </item>
+
+    <!-- 2b. Aurora blob (secondary tint) -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <gradient
+                android:type="radial"
+                android:centerX="0.98"
+                android:centerY="1.0"
+                android:gradientRadius="95%p"
+                android:startColor="#3DF472B6"
+                android:endColor="#00F472B6" />
+        </shape>
+    </item>
+
+    <!-- 3. Top sheen -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <gradient
+                android:angle="270"
+                android:type="linear"
+                android:startColor="#1FFFFFFF"
+                android:centerColor="#0AFFFFFF"
+                android:endColor="#00FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- 4. Hairline border -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="28dp" />
+            <solid android:color="#00000000" />
+            <stroke
+                android:width="1dp"
+                android:color="#33FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

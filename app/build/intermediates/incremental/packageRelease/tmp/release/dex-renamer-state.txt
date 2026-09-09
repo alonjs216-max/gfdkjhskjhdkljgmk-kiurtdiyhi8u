@@ -1,0 +1,4 @@
+#Sat Sep 05 15:21:09 YEKT 2026
+base.0=D\:\\vibecode shit\\ssss\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

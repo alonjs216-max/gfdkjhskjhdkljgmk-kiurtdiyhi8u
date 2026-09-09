@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 4x3+: full dashboard – ring, glass metric tiles and the weekly bars. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/widgetDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/widgetTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:letterSpacing="0.05"
+            android:maxLines="1"
+            android:text="@string/widget_title"
+            android:textColor="#B3FFFFFF"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/widgetPercent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/widget_pill_bg"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:paddingStart="9dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="9dp"
+            android:paddingBottom="3dp"
+            android:text="0%"
+            android:textColor="#FFA78BFA"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Ring + metric tiles -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="88dp"
+            android:layout_height="88dp">
+
+            <ImageView
+                android:id="@+id/widgetRing"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/widget_title" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widgetSteps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="@string/widget_zero"
+                    android:textColor="#FFFFFFFF"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widgetStepsLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:text="@string/notification_steps_label"
+                    android:textColor="#8CFFFFFF"
+                    android:textSize="9sp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/widget_tile_bg"
+                    android:orientation="vertical"
+                    android:paddingStart="9dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="9dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:id="@+id/widgetCalories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_zero"
+                        android:textColor="#FFF472B6"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/widgetCaloriesLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/notification_calories_label"
+                        android:textColor="#8CFFFFFF"
+                        android:textSize="9sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/widget_tile_bg"
+                    android:orientation="vertical"
+                    android:paddingStart="9dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="9dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:id="@+id/widgetDistance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_zero"
+                        android:textColor="#FF60A5FA"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/widgetDistanceLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/notification_distance_label"
+                        android:textColor="#8CFFFFFF"
+                        android:textSize="9sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/widget_tile_bg"
+                    android:orientation="vertical"
+                    android:paddingStart="9dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="9dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:id="@+id/widgetMinutes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_zero"
+                        android:textColor="#FFA78BFA"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/widgetMinutesLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/notification_minutes_label"
+                        android:textColor="#8CFFFFFF"
+                        android:textSize="9sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/widget_tile_bg"
+                    android:orientation="vertical"
+                    android:paddingStart="9dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="9dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:id="@+id/widgetStreak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_zero"
+                        android:textColor="#FFFFC857"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/widgetStreakLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="@string/widget_streak_label"
+                        android:textColor="#8CFFFFFF"
+                        android:textSize="9sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Weekly bars -->
+    <ImageView
+        android:id="@+id/widgetWeek"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/widget_week_title"
+        android:minHeight="38dp"
+        android:scaleType="fitXY" />
+</LinearLayout>

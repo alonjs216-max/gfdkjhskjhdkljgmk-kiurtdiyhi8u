@@ -1,0 +1,456 @@
+D:\vibecode shit\ssss\app\build\intermediates\lint-cache\lintReportDebug\migrated-jars\androidx.navigation.common.lint.NavigationCommonIssueRegistry-5daa12651be0734e..jar: Warning: Library lint checks out of date;
+these checks will be skipped!
+
+Lint found an issue registry (androidx.navigation.common.lint.NavigationCommonIssueRegistry)
+which was compiled against an older version of lint
+than this one. This is usually fine, but not in this
+case; some basic verification shows that the lint
+check jar references (for example) the following API
+which is no longer valid in this version of lint:
+org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion
+(Referenced from androidx/navigation/lint/UtilKt.class)
+
+Therefore, this lint check library is not included
+in analysis. This affects the following lint checks:
+EmptyNavDeepLink,WrongStartDestinationType,MissingSerializableAnnotation,MissingKeepAnnotation
+
+Recompile the checks against the latest version, or if
+this is a check bundled with a third-party library, see
+if there is a more recent version available.
+
+Version of Lint API this lint check is using is 14.
+The Lint API version currently running is 16 (8.7+). [ObsoleteLintCustomCheck]
+D:\vibecode shit\ssss\app\build\intermediates\lint-cache\lintReportDebug\migrated-jars\androidx.navigation.compose.lint.NavigationComposeIssueRegistry-598b224f0ce2f9f2..jar: Warning: Library lint checks out of date;
+these checks will be skipped!
+
+Lint found an issue registry (androidx.navigation.compose.lint.NavigationComposeIssueRegistry)
+which was compiled against an older version of lint
+than this one. This is usually fine, but not in this
+case; some basic verification shows that the lint
+check jar references (for example) the following API
+which is no longer valid in this version of lint:
+org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion
+(Referenced from androidx/navigation/lint/UtilKt.class)
+
+Therefore, this lint check library is not included
+in analysis. This affects the following lint checks:
+ComposableDestinationInComposeScope
+ComposableNavGraphInComposeScope
+UnrememberedGetBackStackEntry
+WrongStartDestinationType
+MissingKeepAnnotation
+MissingSerializableAnnotation
+
+Recompile the checks against the latest version, or if
+this is a check bundled with a third-party library, see
+if there is a more recent version available.
+
+Version of Lint API this lint check is using is 14.
+The Lint API version currently running is 16 (8.7+). [ObsoleteLintCustomCheck]
+D:\vibecode shit\ssss\app\build\intermediates\lint-cache\lintReportDebug\migrated-jars\androidx.navigation.runtime.lint.NavigationRuntimeIssueRegistry-a8fea42aedb9bdb3..jar: Warning: Library lint checks out of date;
+these checks will be skipped!
+
+Lint found an issue registry (androidx.navigation.runtime.lint.NavigationRuntimeIssueRegistry)
+which was compiled against an older version of lint
+than this one. This is usually fine, but not in this
+case; some basic verification shows that the lint
+check jar references (for example) the following API
+which is no longer valid in this version of lint:
+org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion
+(Referenced from androidx/navigation/lint/UtilKt.class)
+
+Therefore, this lint check library is not included
+in analysis. This affects the following lint checks:
+DeepLinkInActivityDestination,WrongStartDestinationType,WrongNavigateRouteType,MissingKeepAnnotation,MissingSerializableAnnotation
+
+Recompile the checks against the latest version, or if
+this is a check bundled with a third-party library, see
+if there is a more recent version available.
+
+Version of Lint API this lint check is using is 14.
+The Lint API version currently running is 16 (8.7+). [ObsoleteLintCustomCheck]
+
+   Explanation for issues of type "ObsoleteLintCustomCheck":
+   Lint can be extended with "custom checks": additional checks implemented by
+   developers and libraries to for example enforce specific API usages
+   required by a library or a company coding style guideline.
+
+   The Lint APIs are not yet stable, so these checks may either cause a
+   performance degradation, or stop working, or provide wrong results.
+
+   This warning flags custom lint checks that are found to be using obsolete
+   APIs and will need to be updated to run in the current lint environment.
+
+   It may also flag issues found to be using a newer version of the API,
+   meaning that you need to use a newer version of lint (or Android Studio or
+   Gradle plugin etc) to work with these checks.
+
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\localization\AppLanguage.kt:50: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+            .commit()
+             ~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\ui\theme\Theme.kt:52: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+            .commit()
+             ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+D:\vibecode shit\ssss\app\build.gradle.kts:70: Warning: A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.19.0 [GradleDependency]
+    implementation("androidx.core:core-ktx:1.15.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:71: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:72: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:73: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0 [GradleDependency]
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:74: Warning: A newer version of androidx.activity:activity-compose than 1.10.0 is available: 1.13.0 [GradleDependency]
+    implementation("androidx.activity:activity-compose:1.10.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:75: Warning: A newer version of androidx.navigation:navigation-compose than 2.8.5 is available: 2.10.0 [GradleDependency]
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:76: Warning: A newer version of androidx.hilt:hilt-navigation-compose than 1.2.0 is available: 1.4.0 [GradleDependency]
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:77: Warning: A newer version of androidx.hilt:hilt-work than 1.2.0 is available: 1.4.0 [GradleDependency]
+    implementation("androidx.hilt:hilt-work:1.2.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:78: Warning: A newer version of androidx.hilt:hilt-compiler than 1.2.0 is available: 1.4.0 [GradleDependency]
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:79: Warning: A newer version of androidx.work:work-runtime-ktx than 2.10.0 is available: 2.11.2 [GradleDependency]
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:88: Warning: A newer version of com.google.android.material:material than 1.12.0 is available: 1.14.0 [GradleDependency]
+    implementation("com.google.android.material:material:1.12.0")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:92: Warning: A newer version of androidx.room:room-runtime than 2.6.1 is available: 2.8.4 [GradleDependency]
+    implementation("androidx.room:room-runtime:2.6.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:93: Warning: A newer version of androidx.room:room-ktx than 2.6.1 is available: 2.8.4 [GradleDependency]
+    implementation("androidx.room:room-ktx:2.6.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:94: Warning: A newer version of androidx.room:room-compiler than 2.6.1 is available: 2.8.4 [GradleDependency]
+    ksp("androidx.room:room-compiler:2.6.1")
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:96: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.2.1 [GradleDependency]
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:101: Warning: A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0 [GradleDependency]
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\build.gradle.kts:102: Warning: A newer version of androidx.test.espresso:espresso-core than 3.6.1 is available: 3.7.0 [GradleDependency]
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\tile\StepsTileService.kt:57: Warning: Unnecessary; SDK_INT is always >= 29 [ObsoleteSdkInt]
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 29. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_medium.xml:42: Warning: This tag and its children can be replaced by one <TextView/> and a compound drawable [UseCompoundDrawables]
+        <LinearLayout
+         ~~~~~~~~~~~~
+
+   Explanation for issues of type "UseCompoundDrawables":
+   A LinearLayout which contains an ImageView and a TextView can be more
+   efficiently handled as a compound drawable (a single TextView, using the
+   drawableTop, drawableLeft, drawableRight and/or drawableBottom attributes
+   to draw one or more images adjacent to the text).
+
+   If the two widgets are offset from each other with margins, this can be
+   replaced with a drawablePadding attribute.
+
+   There's a lint quickfix to perform this conversion in the Eclipse plugin.
+
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\MainActivity.kt:374: Information: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var step by remember { mutableStateOf(0) }
+                           ~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\MainActivity.kt:381: Information: Prefer mutableFloatStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var activity by remember { mutableStateOf(1.2f) }
+                               ~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\java\com\xaniihub\app\MainActivity.kt:382: Information: Prefer mutableFloatStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var stepGoal by remember { mutableStateOf(8000f) }
+                               ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AutoboxingStateCreation":
+   Calling mutableStateOf<T>() when T is either backed by a primitive type on
+   the JVM or is a value class results in a state implementation that requires
+   all state values to be boxed. This usually causes an additional allocation
+   for each state write, and adds some additional work to auto-unbox values
+   when reading the value of the state. Instead, prefer to use a specialized
+   primitive state implementation for Int, Long, Float, and Double when the
+   state does not need to track null values and does not override the default
+   SnapshotMutationPolicy. See mutableIntStateOf(), mutableLongStateOf(),
+   mutableFloatStateOf(), and mutableDoubleStateOf() for more information.
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.runtime
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:57: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+    <LinearLayout
+     ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:146: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+    <LinearLayout
+     ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:54: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+    <LinearLayout
+     ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:56: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+    <LinearLayout
+     ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:110: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+            <LinearLayout
+             ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:183: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+            <LinearLayout
+             ~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_medium.xml:3: Warning: Set android:baselineAligned="false" on this element for better performance [DisableBaselineAlignment]
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ ~~~~~~~~~~~~
+
+   Explanation for issues of type "DisableBaselineAlignment":
+   When a LinearLayout is used to distribute the space proportionally between
+   nested layouts, the baseline alignment property should be turned off to
+   make the layout computation faster.
+
+D:\vibecode shit\ssss\app\src\main\res\drawable\bg_notification_dot.xml:2: Warning: The resource R.drawable.bg_notification_dot appears to be unused [UnusedResources]
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+^
+D:\vibecode shit\ssss\app\src\main\res\drawable\bg_notification_ring.xml:2: Warning: The resource R.drawable.bg_notification_ring appears to be unused [UnusedResources]
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+^
+D:\vibecode shit\ssss\app\src\main\res\values\colors.xml:4: Warning: The resource R.color.launcher_fg appears to be unused [UnusedResources]
+    <color name="launcher_fg">#FFFFFF</color>
+           ~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\drawable\ic_launcher_foreground.xml:2: Warning: The resource R.drawable.ic_launcher_foreground appears to be unused [UnusedResources]
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+^
+D:\vibecode shit\ssss\app\src\main\res\drawable-nodpi\ringwalk_logo.png: Warning: The resource R.drawable.ringwalk_logo appears to be unused [UnusedResources]
+D:\vibecode shit\ssss\app\src\main\res\values\strings.xml:7: Warning: The resource R.string.tracking_notification_channel appears to be unused [UnusedResources]
+    <string name="tracking_notification_channel">RingWalk Tracking</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\values\strings.xml:8: Warning: The resource R.string.tracking_notification_title appears to be unused [UnusedResources]
+    <string name="tracking_notification_title">RingWalk работает в фоне</string>
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps.xml:6: Warning: The resource R.layout.widget_steps appears to be unused [UnusedResources]
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+^
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+D:\vibecode shit\ssss\app\src\main\res\mipmap-hdpi\ic_launcher.png: Warning: Launcher icons should not fill every pixel of their square region; see the design guide for details [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-mdpi\ic_launcher.png: Warning: Launcher icons should not fill every pixel of their square region; see the design guide for details [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xhdpi\ic_launcher.png: Warning: Launcher icons should not fill every pixel of their square region; see the design guide for details [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxhdpi\ic_launcher.png: Warning: Launcher icons should not fill every pixel of their square region; see the design guide for details [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxxhdpi\ic_launcher.png: Warning: Launcher icons should not fill every pixel of their square region; see the design guide for details [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-hdpi\ic_launcher_round.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-mdpi\ic_launcher_round.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xhdpi\ic_launcher_round.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxhdpi\ic_launcher_round.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxxhdpi\ic_launcher_round.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+
+   Explanation for issues of type "IconLauncherShape":
+   According to the Android Design Guide
+   (https://d.android.com/r/studio-ui/designer/material/iconography) your
+   launcher icons should "use a distinct silhouette", a "three-dimensional,
+   front view, with a slight perspective as if viewed from above, so that
+   users perceive some depth."
+
+   The unique silhouette implies that your launcher icon should not be a
+   filled square.
+
+D:\vibecode shit\ssss\app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+D:\vibecode shit\ssss\app\src\main\res\mipmap-anydpi-v26\ic_launcher_round.xml:2: Warning: The application adaptive roundIcon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+
+   Explanation for issues of type "MonochromeLauncherIcon":
+   If android:roundIcon and android:icon are both in your manifest, you must
+   either remove the reference to android:roundIcon if it is not needed; or,
+   supply the monochrome icon in the drawable defined by the android:roundIcon
+   and android:icon attribute.
+
+   For example, if android:roundIcon and android:icon are both in the
+   manifest, a launcher might choose to use android:roundIcon over
+   android:icon to display the adaptive app icon. Therefore, your themed
+   application iconwill not show if your monochrome attribute is not also
+   specified in android:roundIcon.
+
+D:\vibecode shit\ssss\app\src\main\res\drawable\ringwalk_logo_foreground.png: Warning: Found bitmap drawable res/drawable/ringwalk_logo_foreground.png in densityless folder [IconLocation]
+
+   Explanation for issues of type "IconLocation":
+   The res/drawable folder is intended for density-independent graphics such
+   as shapes defined in XML. For bitmaps, move it to drawable-mdpi and
+   consider providing higher and lower resolution versions in drawable-ldpi,
+   drawable-hdpi and drawable-xhdpi. If the icon really is density independent
+   (for example a solid color) you can place it in drawable-nodpi.
+
+   https://developer.android.com/guide/practices/screens_support.html
+
+D:\vibecode shit\ssss\app\src\main\res\mipmap-hdpi\ic_launcher_round.png: Warning: The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png [IconDuplicates]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-mdpi\ic_launcher_round.png: Warning: The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png [IconDuplicates]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xhdpi\ic_launcher_round.png: Warning: The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png [IconDuplicates]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxhdpi\ic_launcher_round.png: Warning: The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png [IconDuplicates]
+D:\vibecode shit\ssss\app\src\main\res\mipmap-xxxhdpi\ic_launcher_round.png: Warning: The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png [IconDuplicates]
+
+   Explanation for issues of type "IconDuplicates":
+   If an icon is repeated under different names, you can consolidate and just
+   use one of the icons and delete the others to make your application
+   smaller. However, duplicated icons usually are not intentional and can
+   sometimes point to icons that were accidentally overwritten or accidentally
+   not updated.
+
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_compact.xml:100: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_compact.xml:129: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_compact.xml:158: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:182: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+                android:textSize="10sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:216: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+                android:textSize="10sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:250: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+                android:textSize="10sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_compact.xml:47: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+            android:textSize="9sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_compact.xml:76: Warning: Avoid using sizes smaller than 11sp: 8sp [SmallSp]
+            android:textSize="8sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:90: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                android:textSize="9sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:124: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                android:textSize="9sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:158: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                android:textSize="9sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:192: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                android:textSize="9sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:220: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:230: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:99: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                    android:textSize="9sp" />
+                    ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:145: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                        android:textSize="9sp" />
+                        ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:179: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                        android:textSize="9sp" />
+                        ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:219: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                        android:textSize="9sp" />
+                        ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:253: Warning: Avoid using sizes smaller than 11sp: 9sp [SmallSp]
+                        android:textSize="9sp" />
+                        ~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_medium.xml:109: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+                android:textSize="10sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_medium.xml:121: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+                android:textSize="10sp" />
+                ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_week.xml:79: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp" />
+            ~~~~~~~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_week.xml:89: Warning: Avoid using sizes smaller than 11sp: 10sp [SmallSp]
+            android:textSize="10sp"
+            ~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "SmallSp":
+   Avoid using sizes smaller than 11sp.
+
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_compact.xml:31: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:50: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\notification_tracking_expanded.xml:81: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+                android:text="0%"
+                ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_compact.xml:90: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+        android:text="0%"
+        ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_stats.xml:48: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps.xml:44: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_large.xml:49: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_medium.xml:29: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+D:\vibecode shit\ssss\app\src\main\res\layout\widget_steps_small.xml:43: Warning: Hardcoded string "0%", should use @string resource [HardcodedText]
+            android:text="0%"
+            ~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "HardcodedText":
+   Hardcoding text attributes directly in layout files is bad for several
+   reasons:
+
+   * When creating configuration variations (for example for landscape or
+   portrait) you have to repeat the actual text (and keep it up to date when
+   making changes)
+
+   * The application cannot be translated to other languages by just adding
+   new translations for existing string resources.
+
+   There are quickfixes to automatically extract this hardcoded string into a
+   resource lookup.
+
+0 errors, 90 warnings

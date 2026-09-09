@@ -1,0 +1,1253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.7.2" type="incidents">
+
+    <incident
+        id="ApplySharedPref"
+        severity="warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background">
+        <fix-replace
+            description="Replace commit() with apply()"
+            oldPattern="(commit)\s*\("
+            replacement="apply"
+            priority="0"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/localization/AppLanguage.kt"
+            line="50"
+            column="14"
+            startOffset="1976"
+            endLine="50"
+            endColumn="22"
+            endOffset="1984"/>
+    </incident>
+
+    <incident
+        id="ApplySharedPref"
+        severity="warning"
+        message="Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background">
+        <fix-replace
+            description="Replace commit() with apply()"
+            oldPattern="(commit)\s*\("
+            replacement="apply"
+            priority="0"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/ui/theme/Theme.kt"
+            line="52"
+            column="14"
+            startOffset="1989"
+            endLine="52"
+            endColumn="22"
+            endOffset="1997"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.19.0">
+        <fix-replace
+            description="Change to 1.19.0"
+            family="Update versions"
+            oldString="1.15.0"
+            replacement="1.19.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="70"
+            column="20"
+            startOffset="1535"
+            endLine="70"
+            endColumn="51"
+            endOffset="1566"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="71"
+            column="20"
+            startOffset="1587"
+            endLine="71"
+            endColumn="68"
+            endOffset="1635"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="72"
+            column="20"
+            startOffset="1656"
+            endLine="72"
+            endColumn="74"
+            endOffset="1710"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="73"
+            column="20"
+            startOffset="1731"
+            endLine="73"
+            endColumn="72"
+            endOffset="1783"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.10.0 is available: 1.13.0">
+        <fix-replace
+            description="Change to 1.13.0"
+            family="Update versions"
+            oldString="1.10.0"
+            replacement="1.13.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="74"
+            column="20"
+            startOffset="1804"
+            endLine="74"
+            endColumn="63"
+            endOffset="1847"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.navigation:navigation-compose than 2.8.5 is available: 2.10.0">
+        <fix-replace
+            description="Change to 2.10.0"
+            family="Update versions"
+            oldString="2.8.5"
+            replacement="2.10.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="75"
+            column="20"
+            startOffset="1868"
+            endLine="75"
+            endColumn="66"
+            endOffset="1914"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.hilt:hilt-navigation-compose than 1.2.0 is available: 1.4.0">
+        <fix-replace
+            description="Change to 1.4.0"
+            family="Update versions"
+            oldString="1.2.0"
+            replacement="1.4.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="76"
+            column="20"
+            startOffset="1935"
+            endLine="76"
+            endColumn="65"
+            endOffset="1980"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.hilt:hilt-work than 1.2.0 is available: 1.4.0">
+        <fix-replace
+            description="Change to 1.4.0"
+            family="Update versions"
+            oldString="1.2.0"
+            replacement="1.4.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="77"
+            column="20"
+            startOffset="2001"
+            endLine="77"
+            endColumn="51"
+            endOffset="2032"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.hilt:hilt-compiler than 1.2.0 is available: 1.4.0">
+        <fix-replace
+            description="Change to 1.4.0"
+            family="Update versions"
+            oldString="1.2.0"
+            replacement="1.4.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="78"
+            column="9"
+            startOffset="2042"
+            endLine="78"
+            endColumn="44"
+            endOffset="2077"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.work:work-runtime-ktx than 2.10.0 is available: 2.11.2">
+        <fix-replace
+            description="Change to 2.11.2"
+            family="Update versions"
+            oldString="2.10.0"
+            replacement="2.11.2"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="79"
+            column="20"
+            startOffset="2098"
+            endLine="79"
+            endColumn="59"
+            endOffset="2137"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.android.material:material than 1.12.0 is available: 1.14.0">
+        <fix-replace
+            description="Change to 1.14.0"
+            family="Update versions"
+            oldString="1.12.0"
+            replacement="1.14.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="88"
+            column="20"
+            startOffset="2523"
+            endLine="88"
+            endColumn="65"
+            endOffset="2568"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-runtime than 2.6.1 is available: 2.8.4">
+        <fix-replace
+            description="Change to 2.8.4"
+            family="Update versions"
+            oldString="2.6.1"
+            replacement="2.8.4"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="92"
+            column="20"
+            startOffset="2712"
+            endLine="92"
+            endColumn="54"
+            endOffset="2746"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-ktx than 2.6.1 is available: 2.8.4">
+        <fix-replace
+            description="Change to 2.8.4"
+            family="Update versions"
+            oldString="2.6.1"
+            replacement="2.8.4"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="93"
+            column="20"
+            startOffset="2767"
+            endLine="93"
+            endColumn="50"
+            endOffset="2797"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.room:room-compiler than 2.6.1 is available: 2.8.4">
+        <fix-replace
+            description="Change to 2.8.4"
+            family="Update versions"
+            oldString="2.6.1"
+            replacement="2.8.4"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="94"
+            column="9"
+            startOffset="2807"
+            endLine="94"
+            endColumn="44"
+            endOffset="2842"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.2.1">
+        <fix-replace
+            description="Change to 1.2.1"
+            family="Update versions"
+            oldString="1.1.1"
+            replacement="1.2.1"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="96"
+            column="20"
+            startOffset="2864"
+            endLine="96"
+            endColumn="68"
+            endOffset="2912"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0">
+        <fix-replace
+            description="Change to 1.3.0"
+            family="Update versions"
+            oldString="1.2.1"
+            replacement="1.3.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="101"
+            column="31"
+            startOffset="3104"
+            endLine="101"
+            endColumn="62"
+            endOffset="3135"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.6.1 is available: 3.7.0">
+        <fix-replace
+            description="Change to 3.7.0"
+            family="Update versions"
+            oldString="3.6.1"
+            replacement="3.7.0"
+            priority="0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="102"
+            column="31"
+            startOffset="3167"
+            endLine="102"
+            endColumn="75"
+            endOffset="3211"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; SDK_INT is always >= 29">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/tile/StepsTileService.kt"
+            line="57"
+            column="13"
+            startOffset="2008"
+            endLine="57"
+            endColumn="59"
+            endOffset="2054"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 29. Merge all the resources in this folder into `mipmap-anydpi`.">
+        <fix-data file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26" folderName="mipmap-anydpi" requiresApi="29"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26"/>
+    </incident>
+
+    <incident
+        id="UseCompoundDrawables"
+        severity="warning"
+        message="This tag and its children can be replaced by one `&lt;TextView/>` and a compound drawable">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_medium.xml"
+            line="42"
+            column="10"
+            startOffset="1437"
+            endLine="42"
+            endColumn="22"
+            endOffset="1449"/>
+    </incident>
+
+    <incident
+        id="AutoboxingStateCreation"
+        severity="informational"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`">
+        <fix-replace
+            description="Replace with mutableIntStateOf"
+            replacement="androidx.compose.runtime.mutableIntStateOf"
+            shortenNames="true"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+                startOffset="14308"
+                endOffset="14322"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+            line="374"
+            column="28"
+            startOffset="14308"
+            endLine="374"
+            endColumn="42"
+            endOffset="14322"/>
+    </incident>
+
+    <incident
+        id="AutoboxingStateCreation"
+        severity="informational"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`">
+        <fix-replace
+            description="Replace with mutableFloatStateOf"
+            replacement="androidx.compose.runtime.mutableFloatStateOf"
+            shortenNames="true"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+                startOffset="14599"
+                endOffset="14613"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+            line="381"
+            column="32"
+            startOffset="14599"
+            endLine="381"
+            endColumn="46"
+            endOffset="14613"/>
+    </incident>
+
+    <incident
+        id="AutoboxingStateCreation"
+        severity="informational"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`">
+        <fix-replace
+            description="Replace with mutableFloatStateOf"
+            replacement="androidx.compose.runtime.mutableFloatStateOf"
+            shortenNames="true"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+                startOffset="14653"
+                endOffset="14667"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/xaniihub/app/MainActivity.kt"
+            line="382"
+            column="32"
+            startOffset="14653"
+            endLine="382"
+            endColumn="46"
+            endOffset="14667"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="57"
+            column="6"
+            startOffset="2033"
+            endLine="57"
+            endColumn="18"
+            endOffset="2045"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="146"
+            column="6"
+            startOffset="5418"
+            endLine="146"
+            endColumn="18"
+            endOffset="5430"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="54"
+            column="6"
+            startOffset="1938"
+            endLine="54"
+            endColumn="18"
+            endOffset="1950"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="56"
+            column="6"
+            startOffset="1990"
+            endLine="56"
+            endColumn="18"
+            endOffset="2002"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="110"
+            column="14"
+            startOffset="4074"
+            endLine="110"
+            endColumn="26"
+            endOffset="4086"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="183"
+            column="14"
+            startOffset="7415"
+            endLine="183"
+            endColumn="26"
+            endOffset="7427"/>
+    </incident>
+
+    <incident
+        id="DisableBaselineAlignment"
+        severity="warning"
+        message="Set `android:baselineAligned=&quot;false&quot;` on this element for better performance">
+        <fix-attribute
+            description="Set baselineAligned=&quot;false&quot;"
+            robot="true"
+            independent="true"
+            namespace="http://schemas.android.com/apk/res/android"
+            attribute="baselineAligned"
+            value="false"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_medium.xml"
+            line="3"
+            column="2"
+            startOffset="111"
+            endLine="3"
+            endColumn="14"
+            endOffset="123"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="IconLauncherShape"
+        severity="warning"
+        message="Launcher icon used as round icon did not have a circular shape">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher_round.png"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive icon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="260"/>
+    </incident>
+
+    <incident
+        id="MonochromeLauncherIcon"
+        severity="warning"
+        message="The application adaptive roundIcon is missing a monochrome tag">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26/ic_launcher_round.xml"
+            line="2"
+            column="1"
+            startOffset="39"
+            endLine="5"
+            endColumn="17"
+            endOffset="260"/>
+    </incident>
+
+    <incident
+        id="IconLocation"
+        severity="warning"
+        message="Found bitmap drawable `res/drawable/ringwalk_logo_foreground.png` in densityless folder">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/drawable/ringwalk_logo_foreground.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-hdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-mdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="IconDuplicates"
+        severity="warning"
+        message="The following unrelated icon files have identical contents: ic_launcher.png, ic_launcher_round.png">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher_round.png"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-xxxhdpi/ic_launcher.png"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_compact.xml"
+            line="100"
+            column="13"
+            startOffset="3461"
+            endLine="100"
+            endColumn="36"
+            endOffset="3484"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_compact.xml"
+            line="129"
+            column="13"
+            startOffset="4473"
+            endLine="129"
+            endColumn="36"
+            endOffset="4496"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_compact.xml"
+            line="158"
+            column="13"
+            startOffset="5482"
+            endLine="158"
+            endColumn="36"
+            endOffset="5505"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="182"
+            column="17"
+            startOffset="6842"
+            endLine="182"
+            endColumn="40"
+            endOffset="6865"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="216"
+            column="17"
+            startOffset="8178"
+            endLine="216"
+            endColumn="40"
+            endOffset="8201"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="250"
+            column="17"
+            startOffset="9511"
+            endLine="250"
+            endColumn="40"
+            endOffset="9534"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_compact.xml"
+            line="47"
+            column="13"
+            startOffset="1716"
+            endLine="47"
+            endColumn="35"
+            endOffset="1738"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `8sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_compact.xml"
+            line="76"
+            column="13"
+            startOffset="2751"
+            endLine="76"
+            endColumn="35"
+            endOffset="2773"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="90"
+            column="17"
+            startOffset="3361"
+            endLine="90"
+            endColumn="39"
+            endOffset="3383"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="124"
+            column="17"
+            startOffset="4705"
+            endLine="124"
+            endColumn="39"
+            endOffset="4727"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="158"
+            column="17"
+            startOffset="6049"
+            endLine="158"
+            endColumn="39"
+            endOffset="6071"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="192"
+            column="17"
+            startOffset="7390"
+            endLine="192"
+            endColumn="39"
+            endOffset="7412"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="220"
+            column="13"
+            startOffset="8312"
+            endLine="220"
+            endColumn="36"
+            endOffset="8335"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="230"
+            column="13"
+            startOffset="8680"
+            endLine="230"
+            endColumn="36"
+            endOffset="8703"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="99"
+            column="21"
+            startOffset="3744"
+            endLine="99"
+            endColumn="43"
+            endOffset="3766"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="145"
+            column="25"
+            startOffset="5723"
+            endLine="145"
+            endColumn="47"
+            endOffset="5745"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="179"
+            column="25"
+            startOffset="7315"
+            endLine="179"
+            endColumn="47"
+            endOffset="7337"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="219"
+            column="25"
+            startOffset="9108"
+            endLine="219"
+            endColumn="47"
+            endOffset="9130"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `9sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="253"
+            column="25"
+            startOffset="10688"
+            endLine="253"
+            endColumn="47"
+            endOffset="10710"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_medium.xml"
+            line="109"
+            column="17"
+            startOffset="4035"
+            endLine="109"
+            endColumn="40"
+            endOffset="4058"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_medium.xml"
+            line="121"
+            column="17"
+            startOffset="4512"
+            endLine="121"
+            endColumn="40"
+            endOffset="4535"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_week.xml"
+            line="79"
+            column="13"
+            startOffset="2806"
+            endLine="79"
+            endColumn="36"
+            endOffset="2829"/>
+    </incident>
+
+    <incident
+        id="SmallSp"
+        severity="warning"
+        message="Avoid using sizes smaller than `11sp`: `10sp`">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_week.xml"
+            line="89"
+            column="13"
+            startOffset="3171"
+            endLine="89"
+            endColumn="36"
+            endOffset="3194"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_compact.xml"
+            line="31"
+            column="13"
+            startOffset="1074"
+            endLine="31"
+            endColumn="30"
+            endOffset="1091"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="50"
+            column="13"
+            startOffset="1823"
+            endLine="50"
+            endColumn="30"
+            endOffset="1840"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/notification_tracking_expanded.xml"
+            line="81"
+            column="17"
+            startOffset="2906"
+            endLine="81"
+            endColumn="34"
+            endOffset="2923"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_compact.xml"
+            line="90"
+            column="9"
+            startOffset="3212"
+            endLine="90"
+            endColumn="26"
+            endOffset="3229"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_stats.xml"
+            line="48"
+            column="13"
+            startOffset="1776"
+            endLine="48"
+            endColumn="30"
+            endOffset="1793"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps.xml"
+            line="44"
+            column="13"
+            startOffset="1554"
+            endLine="44"
+            endColumn="30"
+            endOffset="1571"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_large.xml"
+            line="49"
+            column="13"
+            startOffset="1795"
+            endLine="49"
+            endColumn="30"
+            endOffset="1812"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_medium.xml"
+            line="29"
+            column="13"
+            startOffset="1057"
+            endLine="29"
+            endColumn="30"
+            endOffset="1074"/>
+    </incident>
+
+    <incident
+        id="HardcodedText"
+        severity="warning"
+        message="Hardcoded string &quot;0%&quot;, should use `@string` resource">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/layout/widget_steps_small.xml"
+            line="43"
+            column="13"
+            startOffset="1578"
+            endLine="43"
+            endColumn="30"
+            endOffset="1595"/>
+    </incident>
+
+</incidents>

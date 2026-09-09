@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- New widget – 4x1 glass pill: mini ring, counter, calories, percent badge. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="10dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="8dp">
+
+    <ImageView
+        android:id="@+id/widgetRing"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:contentDescription="@string/widget_title" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widgetSteps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/widget_zero"
+            android:textColor="#FFFFFFFF"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widgetStepsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/notification_steps_label"
+            android:textColor="#8CFFFFFF"
+            android:textSize="9sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widgetCalories"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/widget_zero"
+            android:textColor="#FFF472B6"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widgetCaloriesLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/notification_calories_label"
+            android:textColor="#8CFFFFFF"
+            android:textSize="8sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widgetPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_pill_bg"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:paddingStart="9dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="9dp"
+        android:paddingBottom="4dp"
+        android:text="0%"
+        android:textColor="#FFA78BFA"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+</LinearLayout>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RingWalk</string>
+    <string name="nav_achievements">Awards</string>
+    <string name="nav_analytics">Analytics</string>
+    <string name="nav_goals">Goals</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_profile">Profile</string>
+    <string name="notification_calories_label">kcal</string>
+    <string name="notification_distance_label">m</string>
+    <string name="notification_minutes_label">min</string>
+    <string name="notification_steps_label">steps</string>
+    <string name="tile_label">Steps</string>
+    <string name="tracking_notification_channel">RingWalk Tracking</string>
+    <string name="tracking_notification_title">RingWalk is running in background</string>
+    <string name="widget_goal_default">Goal 8,000</string>
+    <string name="widget_title">Steps today</string>
+    <string name="widget_zero">0</string>
+</resources>
