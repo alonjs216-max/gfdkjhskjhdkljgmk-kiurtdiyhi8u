@@ -130,8 +130,12 @@ fun AuroraBackground(
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Frosted-glass card: translucent surface, hairline gradient border with a bright top edge,
- * inner sheen and a soft palette-tinted drop shadow.
+ * Card frame with no fill: the body stays fully transparent so the ambient background shows
+ * through, and only a hairline gradient border with a bright top edge marks the bounds.
+ *
+ * The elevation shadow is intentionally omitted together with the fill. Android draws a
+ * shadow's umbra *underneath* transparent casters, so keeping it would paint the same tinted
+ * rectangle back behind the content.
  */
 @Composable
 fun PremiumCard(
@@ -141,30 +145,10 @@ fun PremiumCard(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val scheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(cornerRadius)
     Box(
         modifier = modifier
-            .shadow(
-                elevation = 22.dp,
-                shape = shape,
-                ambientColor = accent.copy(alpha = 0.35f),
-                spotColor = accent.copy(alpha = 0.45f)
-            )
             .clip(shape)
-            .background(scheme.surface.copy(alpha = 0.80f))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.09f),
-                        accent.copy(alpha = 0.07f),
-                        Color.Transparent,
-                        accent.copy(alpha = 0.05f)
-                    ),
-                    start = Offset.Zero,
-                    end = Offset(900f, 900f)
-                )
-            )
             .drawBehind {
                 val strokeWidth = 1.2.dp.toPx()
                 val radius = cornerRadius.toPx()
