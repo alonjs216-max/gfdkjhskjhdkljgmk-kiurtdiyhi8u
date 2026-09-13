@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -84,6 +86,7 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +129,16 @@ fun HomeScreen(
         stats?.hourlySteps.orEmpty().takeIf { it.any { v -> v > 0 } }.orEmpty()
     }
     val hasHourly = hourly.any { it > 0 }
+    // The "now" marker used to freeze: LocalTime.now() was read once per composition, so a screen
+    // left open kept highlighting the hour in which it happened to be opened. A minute ticker,
+    // aligned to the minute boundary, moves it along with the clock.
+    val currentHour by produceState(initialValue = LocalTime.now().hour, key1 = state.isToday) {
+        if (!state.isToday) return@produceState
+        while (true) {
+            value = LocalTime.now().hour
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
+        }
+    }
 
     val springSpec = spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow)
     val springSpecInt = spring<Int>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow)
@@ -220,6 +233,11 @@ fun HomeScreen(
                         centerText = formatInt(animatedSteps),
                         subtitle = appText("of_steps").format(formatInt(stats?.dailyGoal ?: 8000)),
                         eyebrow = "$percent%",
+                        contentDescription = appText("ring_desc").format(
+                            formatInt(animatedSteps),
+                            formatInt(stats?.dailyGoal ?: 8000),
+                            formatInt(percent)
+                        ),
                         modifier = Modifier.padding(top = 2.dp)
                     )
                     // Streak + goal chips under the ring.
@@ -238,6 +256,18 @@ fun HomeScreen(
                     }
                 }
             }
+
+            // ---- Streak -------------------------------------------------------------------
+            // The goal-based streak was computed in PR #8 but never surfaced: the ring chip only
+            // printed a bare number, with no record, no "today still counts" state and no way to
+            // learn how the rule works.
+            StreakCard(
+                streakDays = stats?.streakDays ?: 0,
+                bestDays = stats?.streakBestDays ?: 0,
+                goalReached = stats?.goalReached ?: false,
+                stepsLeft = ((stats?.dailyGoal ?: 0) - (stats?.steps ?: 0)).coerceAtLeast(0),
+                isToday = state.isToday
+            )
 
             // ---- Metrics ------------------------------------------------------------------
             val kcalLabel = appText("kcal")
@@ -308,7 +338,7 @@ fun HomeScreen(
                         trailing = {
                             Text(
                                 appText("hourly_peak").format(formatInt(hourly.maxOrNull() ?: 0)),
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelSmall.tabular(),
                                 color = scheme.onSurfaceVariant
                             )
                         }
@@ -316,7 +346,11 @@ fun HomeScreen(
                     if (hasHourly) {
                         TinyBarChart(
                             values = hourly,
-                            highlightIndex = if (state.isToday) LocalTime.now().hour.coerceAtMost(hourly.lastIndex) else null
+                            highlightIndex = if (state.isToday) currentHour.coerceAtMost(hourly.lastIndex) else null,
+                            contentDescription = appText("chart_desc").format(
+                                appText("hourly_activity"),
+                                formatInt(hourly.maxOrNull() ?: 0)
+                            )
                         )
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Eyebrow("00", modifier = Modifier.align(Alignment.CenterStart))
@@ -357,7 +391,7 @@ fun HomeScreen(
                         Eyebrow(appText("lifetime_steps"))
                         Text(
                             formatInt(stats?.lifetimeSteps ?: 0L),
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.displaySmall.tabular(),
                             color = scheme.onSurface
                         )
                         Text(appText("achievements"), style = MaterialTheme.typography.bodySmall, color = scheme.onSurfaceVariant)
@@ -391,7 +425,7 @@ fun HomeScreen(
                         Eyebrow(appText("daily_goal"))
                         Text(
                             appText("steps_value").format(formatInt(stats?.dailyGoal ?: 8000)),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleLarge.tabular(),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -471,6 +505,74 @@ fun HomeScreen(
     }
 }
 
+/**
+ * Surfaces the goal-based streak: how many consecutive days closed their own goal, the personal
+ * best to chase, whether the selected day already counts and - while it does not - exactly how
+ * many steps are still missing. The rule itself is spelled out, because a streak that can reset
+ * at midnight has to be predictable.
+ */
+@Composable
+private fun StreakCard(
+    streakDays: Int,
+    bestDays: Int,
+    goalReached: Boolean,
+    stepsLeft: Int,
+    isToday: Boolean
+) {
+    val scheme = MaterialTheme.colorScheme
+    val accent = Color(0xFFFF8A50)
+    val statusText = when {
+        goalReached -> appText("streak_goal_reached")
+        isToday -> appText("streak_at_risk").format(formatInt(stepsLeft))
+        else -> appText("streak_none")
+    }
+    PremiumCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SectionHeader(
+                title = appText("streak_title"),
+                icon = Icons.Outlined.Whatshot,
+                trailing = {
+                    Text(
+                        appText("streak_best").format(formatInt(bestDays)),
+                        style = MaterialTheme.typography.labelSmall.tabular(),
+                        color = scheme.onSurfaceVariant
+                    )
+                }
+            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    formatInt(streakDays),
+                    style = MaterialTheme.typography.displaySmall.tabular(),
+                    fontWeight = FontWeight.Bold,
+                    color = if (goalReached) accent else scheme.onSurface
+                )
+                Text(
+                    appText("streak_days_unit"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = scheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
+            }
+            Text(
+                statusText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (goalReached) accent else scheme.onSurface
+            )
+            Text(
+                appText("streak_rule_hint"),
+                style = MaterialTheme.typography.labelSmall,
+                color = scheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 @Composable
 private fun InfoChip(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -491,6 +593,12 @@ private fun InfoChip(
         Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
     }
 }
+
+/**
+ * Tabular figures. Proportional digits change width while a counter animates, so the whole
+ * number kept shifting left and right on every frame.
+ */
+private fun TextStyle.tabular(): TextStyle = copy(fontFeatureSettings = "tnum")
 
 private fun LocalDate.coerceAtMost(max: LocalDate): LocalDate = if (isAfter(max)) max else this
 private fun formatInt(value: Int): String =
