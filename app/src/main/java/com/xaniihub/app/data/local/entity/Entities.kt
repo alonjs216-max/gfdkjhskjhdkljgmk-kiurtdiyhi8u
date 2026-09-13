@@ -1,9 +1,16 @@
 package com.xaniihub.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "step_events")
+@Entity(
+    tableName = "step_events",
+    // Every read of the raw events filters by dateEpochDay - the dashboard, the hourly chart and
+    // the rebuild of the derived metrics - so each of them used to scan the whole table.
+    indices = [Index(value = ["dateEpochDay"])]
+)
 data class StepEventEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val timestamp: Long,
@@ -20,7 +27,14 @@ data class DailySummaryEntity(
     val steps: Int,
     val distanceKm: Float,
     val calories: Float,
-    val activeMinutes: Int
+    val activeMinutes: Int,
+    /**
+     * Daily goal that was active while this day was being recorded. The streak is evaluated
+     * against this snapshot, so changing the goal today no longer rewrites which of the past
+     * days count as completed. 0 means the day predates the snapshot and the current goal is
+     * used as a fallback.
+     */
+    @ColumnInfo(defaultValue = "0") val goal: Int = 0
 )
 
 @Entity(tableName = "goals")
