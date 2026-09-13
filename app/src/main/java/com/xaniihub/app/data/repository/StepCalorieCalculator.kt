@@ -12,18 +12,28 @@ object StepCalorieCalculator {
     private const val RUNNING_MET = 8.5f
     private const val RUNNING_CADENCE = 140f
     private const val MAX_USABLE_CADENCE = 220f
+    private const val MIN_WEIGHT_KG = 25f
+    private const val MAX_WEIGHT_KG = 350f
+    private const val FALLBACK_WEIGHT_KG = 70f
+    private const val MIN_HEIGHT_CM = 100
+    private const val MAX_HEIGHT_CM = 250
+    private const val FALLBACK_HEIGHT_CM = 175
 
     fun estimate(steps: Int, weightKg: Float, heightCm: Int, cadence: Float): Float {
-        if (steps <= 0 || !weightKg.isFinite() || weightKg !in 25f..350f || heightCm !in 100..250) {
-            return 0f
-        }
+        if (steps <= 0) return 0f
+
+        // Body params outside of the plausible range used to make this return 0 kcal, so a single
+        // corrupted or not yet migrated profile value silently erased the calories of every day
+        // instead of degrading gracefully. Clamp the inputs and keep estimating.
+        val weight = sanitizedWeightKg(weightKg)
+        val height = sanitizedHeightCm(heightCm)
 
         val activity = if (cadence.isFinite() && cadence in RUNNING_CADENCE..MAX_USABLE_CADENCE) {
             ActivityKind.RUNNING
         } else {
             ActivityKind.WALKING
         }
-        val strideCm = heightCm * if (activity == ActivityKind.RUNNING) {
+        val strideCm = height * if (activity == ActivityKind.RUNNING) {
             RUNNING_STRIDE_FACTOR
         } else {
             WALKING_STRIDE_FACTOR
@@ -32,7 +42,7 @@ object StepCalorieCalculator {
         val speedKmh = if (activity == ActivityKind.RUNNING) RUNNING_SPEED_KMH else WALKING_SPEED_KMH
         val durationHours = distanceKm / speedKmh
         val met = if (activity == ActivityKind.RUNNING) RUNNING_MET else WALKING_MET
-        return (met * weightKg * durationHours).coerceAtLeast(0f)
+        return (met * weight * durationHours).coerceAtLeast(0f)
     }
 
     fun activityKind(cadence: Float): ActivityKind = if (
@@ -46,12 +56,30 @@ object StepCalorieCalculator {
     }
 
     fun strideKm(heightCm: Int, cadence: Float): Float {
-        if (heightCm !in 100..250) return 0f
+        // Same reasoning as in estimate(): an implausible height must not silently drop the
+        // distance of the day to zero.
+        val height = sanitizedHeightCm(heightCm)
         val factor = if (activityKind(cadence) == ActivityKind.RUNNING) {
             RUNNING_STRIDE_FACTOR
         } else {
             WALKING_STRIDE_FACTOR
         }
-        return heightCm * factor / 100_000f
+        return height * factor / 100_000f
     }
+
+    /** Clamps the weight, falling back to an average one when the value is unusable. */
+    private fun sanitizedWeightKg(weightKg: Float): Float =
+        if (!weightKg.isFinite() || weightKg <= 0f) {
+            FALLBACK_WEIGHT_KG
+        } else {
+            weightKg.coerceIn(MIN_WEIGHT_KG, MAX_WEIGHT_KG)
+        }
+
+    /** Clamps the height, falling back to an average one when the value is unusable. */
+    private fun sanitizedHeightCm(heightCm: Int): Int =
+        if (heightCm <= 0) {
+            FALLBACK_HEIGHT_CM
+        } else {
+            heightCm.coerceIn(MIN_HEIGHT_CM, MAX_HEIGHT_CM)
+        }
 }

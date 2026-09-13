@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -56,7 +55,6 @@ import com.xaniihub.app.ui.components.PremiumCard
 import com.xaniihub.app.localization.AppLanguage
 import com.xaniihub.app.localization.AppLanguageController
 import com.xaniihub.app.localization.appLocale
-import com.xaniihub.app.localization.appString
 import com.xaniihub.app.localization.appText
 import com.xaniihub.app.ui.theme.AppThemeController
 import com.xaniihub.app.ui.theme.AppThemePalette
@@ -293,8 +291,6 @@ fun ProfileScreen(
         Spacer(Modifier.height(24.dp))
     }
 }
-
-
 
 @Composable
 private fun LanguageSelector(modifier: Modifier = Modifier) {
@@ -695,36 +691,6 @@ private fun DynamicsLineChart(
 }
 
 @Composable
-private fun DynamicsMetric(
-    change: String,
-    title: String,
-    value: String,
-    positive: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val color = if (positive) Color(0xFF5EF05D) else Color(0xFFFFA726)
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        Text("${if (positive) "↗" else "↘"} $change", color = color, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
-        Text(value, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-    }
-}
-
-@Composable
-private fun DynamicsDivider() {
-    Box(
-        modifier = Modifier
-            .width(1.dp)
-            .height(96.dp)
-            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.28f))
-    )
-}
-
-@Composable
 private fun GenderChip(
     title: String,
     selected: Boolean,
@@ -783,14 +749,6 @@ private fun List<Int>.averageInt(): Int =
 private fun formatInt(value: Int): String =
     java.text.NumberFormat.getIntegerInstance(appLocale()).format(value)
 
-private fun formatDistance(value: Float): String {
-    val formatter = java.text.NumberFormat.getNumberInstance(appLocale()).apply {
-        minimumFractionDigits = if (value < 10f) 1 else 0
-        maximumFractionDigits = if (value < 10f) 1 else 0
-    }
-    return "${formatter.format(value)} ${appString("km")}" 
-}
-
 @Composable
 private fun bmiLabel(bmi: Float): String = when {
     bmi <= 0f -> "—"
@@ -798,14 +756,4 @@ private fun bmiLabel(bmi: Float): String = when {
     bmi < 25f -> appText("normal")
     bmi < 30f -> appText("overweight")
     else -> appText("obesity")
-}
-
-private fun formatDuration(minutes: Int): String {
-    val h = minutes / 60
-    val m = minutes % 60
-    return if (h > 0) "$h:${m.toString().padStart(2, '0')} ${appString("hour_short")}" else "$m ${appString("min")}"
-}
-
-private fun estimateCalories(steps: Int, weightKg: Float): Int {
-    return ((steps * 0.04f) * (weightKg / 70f)).roundToInt().coerceAtLeast(0)
 }

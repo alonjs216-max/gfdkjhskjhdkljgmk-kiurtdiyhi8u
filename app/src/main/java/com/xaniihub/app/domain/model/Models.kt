@@ -26,6 +26,11 @@ data class DashboardStats(
     val lifetimeSteps: Long,
     val hourlySteps: List<Int> = emptyList()
 ) {
+    /**
+     * Deliberately not capped, unlike [GoalProgress.progress]: the hero ring starts a new lap
+     * for every completed goal and the header prints the raw percentage, so an upper bound here
+     * would hide everything above the daily goal. Only the lower bound is enforced.
+     */
     val progress: Float = if (dailyGoal <= 0) 0f else (steps.toFloat() / dailyGoal).coerceAtLeast(0f)
 }
 

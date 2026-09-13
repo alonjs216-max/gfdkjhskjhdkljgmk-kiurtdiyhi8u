@@ -9,6 +9,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.xaniihub.app.MainActivity
 import com.xaniihub.app.R
+import com.xaniihub.app.localization.appLocale
 import com.xaniihub.app.tracking.TrackingConstants
 import java.time.LocalDate
 
@@ -38,7 +39,10 @@ class StepsTileService : TileService() {
         }
     }
 
-    private fun formatInt(value: Int): String = java.text.NumberFormat.getIntegerInstance().format(value)
+    // Grouping follows the language selected in the app, exactly like the widgets and the
+    // in-app screens, instead of the (possibly different) device locale.
+    private fun formatInt(value: Int): String =
+        java.text.NumberFormat.getIntegerInstance(appLocale()).format(value)
 
     private fun refresh() {
         val tile = qsTile ?: return

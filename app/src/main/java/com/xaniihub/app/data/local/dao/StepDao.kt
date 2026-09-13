@@ -31,8 +31,11 @@ interface StepDao {
     @Query("SELECT * FROM step_events WHERE dateEpochDay = :dateEpochDay ORDER BY timestamp ASC")
     suspend fun getEventsForDay(dateEpochDay: Long): List<StepEventEntity>
 
-    @Query("SELECT COUNT(DISTINCT timestamp / 60000) FROM step_events WHERE dateEpochDay = :dateEpochDay AND stepsDelta > 0")
-    suspend fun countActiveMinutesForDay(dateEpochDay: Long): Int
+    // Active minutes have exactly one definition: XaniiRepositoryImpl.activeMinutesOf() derives
+    // them from the steps and the time span of each reading and stores the result in
+    // daily_summary.activeMinutes. The former "SELECT COUNT(DISTINCT timestamp / 60000)" query
+    // was a second, conflicting definition - it counted every batched reading as a whole active
+    // minute - so it has been removed instead of being kept around unused.
 
     @Query("SELECT * FROM daily_summary ORDER BY dateEpochDay DESC")
     fun observeAllSummaries(): Flow<List<DailySummaryEntity>>
