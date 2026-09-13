@@ -25,6 +25,7 @@ import com.xaniihub.app.domain.model.MiniChallenge
 import com.xaniihub.app.domain.model.TrackingSnapshot
 import com.xaniihub.app.domain.model.WeightPoint
 import com.xaniihub.app.domain.repository.XaniiRepository
+import com.xaniihub.app.tracking.StepTrackingService
 import com.xaniihub.app.tracking.TrackingConstants
 import com.xaniihub.app.widget.RingWalkWidgets
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -284,17 +285,29 @@ class XaniiRepositoryImpl @Inject constructor(
         }
 
     override suspend fun saveBodyParams(params: BodyParams) {
-        bodyDao.upsertBodyParams(
-            BodyParamsEntity(
-                id = 0,
-                weightKg = params.weightKg.coerceIn(25f, 350f),
-                heightCm = params.heightCm.coerceIn(100, 250),
-                age = params.age.coerceIn(13, 120),
-                gender = params.gender.name,
-                activityMultiplier = params.activityMultiplier.coerceIn(1.2f, 1.9f),
-                targetWeightKg = params.targetWeightKg.coerceIn(25f, 350f)
-            )
+        val normalized = BodyParamsEntity(
+            id = 0,
+            weightKg = params.weightKg.coerceIn(25f, 350f),
+            heightCm = params.heightCm.coerceIn(100, 250),
+            age = params.age.coerceIn(13, 120),
+            gender = params.gender.name,
+            activityMultiplier = params.activityMultiplier.coerceIn(1.2f, 1.9f),
+            targetWeightKg = params.targetWeightKg.coerceIn(25f, 350f)
         )
+        val previous = bodyDao.observeBodyParams().first()
+        bodyDao.upsertBodyParams(normalized)
+        // Calories and distance are derived from weight and height, but they are persisted as
+        // per-day totals that were accumulated at ingest time. Without rebuilding them the
+        // profile would show the new weight while the dashboard, the widgets and the tracking
+        // notification kept reporting numbers computed from the previous (or the default) one.
+        if (previous == null ||
+            previous.weightKg != normalized.weightKg ||
+            previous.heightCm != normalized.heightCm
+        ) {
+            recalculateDerivedMetrics(normalized)
+        } else {
+            RingWalkWidgets.refreshAll(context)
+        }
     }
 
     override fun observeWeightTrend(): Flow<List<WeightPoint>> =
@@ -303,12 +316,66 @@ class XaniiRepositoryImpl @Inject constructor(
         }
 
     override suspend fun saveWeight(weightKg: Float) {
+        val normalized = weightKg.coerceIn(25f, 350f)
         bodyDao.upsertWeight(
             WeightEntryEntity(
                 timestamp = System.currentTimeMillis(),
-                weightKg = weightKg.coerceIn(25f, 350f)
+                weightKg = normalized
             )
         )
+        // A logged weight is the current weight of the user, so the profile - and with it the
+        // calorie estimate - has to follow it instead of keeping two sources of truth that
+        // silently drift apart.
+        val current = bodyDao.observeBodyParams().first()
+        if (current != null && current.weightKg == normalized) return
+        val updated = current?.copy(weightKg = normalized) ?: BodyParamsEntity(
+            id = 0,
+            weightKg = normalized,
+            heightCm = DEFAULT_HEIGHT_CM,
+            age = DEFAULT_AGE,
+            gender = GenderType.OTHER.name,
+            activityMultiplier = DEFAULT_ACTIVITY_MULTIPLIER,
+            targetWeightKg = normalized
+        )
+        bodyDao.upsertBodyParams(updated)
+        recalculateDerivedMetrics(updated)
+    }
+
+    /**
+     * Rebuilds the stored per-day distance and calories from the immutable step events with
+     * [body]. Steps and active minutes do not depend on the body params, so they are kept as is,
+     * and days without stored events keep whatever they had.
+     */
+    private suspend fun recalculateDerivedMetrics(body: BodyParamsEntity) {
+        withContext(Dispatchers.IO) {
+            ingestMutex.withLock {
+                stepDao.getAllSummaries().forEach { summary ->
+                    val events = stepDao.getEventsForDay(summary.dateEpochDay)
+                        .filter { it.stepsDelta > 0 }
+                    if (events.isEmpty()) return@forEach
+                    var distanceKm = 0f
+                    var calories = 0f
+                    for (event in events) {
+                        distanceKm += event.stepsDelta * StepCalorieCalculator.strideKm(body.heightCm, event.cadence)
+                        calories += estimateCalories(
+                            steps = event.stepsDelta,
+                            weightKg = body.weightKg,
+                            heightCm = body.heightCm,
+                            cadence = event.cadence
+                        )
+                    }
+                    if (summary.distanceKm != distanceKm || summary.calories != calories) {
+                        stepDao.upsertDailySummary(
+                            summary.copy(distanceKm = distanceKm, calories = calories)
+                        )
+                    }
+                }
+            }
+        }
+        // The widgets, the quick settings tile and the tracking notification all cache the
+        // numbers they display, so they have to be repainted explicitly after a recalculation.
+        RingWalkWidgets.refreshAll(context)
+        StepTrackingService.refresh(context)
     }
 
     override suspend fun getTrackingSnapshot(): TrackingSnapshot {
@@ -601,6 +668,8 @@ class XaniiRepositoryImpl @Inject constructor(
         const val DEFAULT_MONTHLY_GOAL = 240_000
         const val DEFAULT_WEIGHT_KG = 70f
         const val DEFAULT_HEIGHT_CM = 175
+        const val DEFAULT_AGE = 27
+        const val DEFAULT_ACTIVITY_MULTIPLIER = 1.2f
         const val MAX_PLAUSIBLE_DELTA = 50_000
         const val MAX_SPLIT_WINDOW_MS = 24L * 60L * 60L * 1_000L
         const val MAX_SPLIT_SEGMENTS = 4

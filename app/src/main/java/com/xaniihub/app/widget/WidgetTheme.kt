@@ -211,17 +211,29 @@ object WidgetRepository {
 
         val byDay = summaries.associateBy { it.dateEpochDay }
         val today = LocalDate.now().toEpochDay()
+        val todaySummary = byDay[today]
+
+        // Room is the source of truth, the preferences are only a cache for instant painting.
+        // Calories and distance are rebuilt whenever the weight or the height changes in the
+        // profile, so they can legitimately go *down* and must not be clamped to the cached
+        // maximum; the steps of the day come from Room when the cache is stale (after a reboot,
+        // or before the first sensor batch of the day).
+        val steps = maxOf(base.steps, todaySummary?.steps ?: 0)
+        val calories = todaySummary?.calories?.toInt()?.coerceAtLeast(0) ?: base.calories
+        val distanceMeters = todaySummary?.let { (it.distanceKm * 1000f).toInt().coerceAtLeast(0) }
+            ?: base.distanceMeters
+        val activeMinutes = todaySummary?.activeMinutes ?: base.activeMinutes
         val week = (0..6).map { offset ->
             val day = today - (6 - offset)
-            if (day == today) maxOf(base.steps, byDay[day]?.steps ?: 0) else byDay[day]?.steps ?: 0
+            if (day == today) steps else byDay[day]?.steps ?: 0
         }
 
         // Goal streak: consecutive days (walking backwards) where the daily goal was reached.
         var streak = 0
         var cursor = today
         while (true) {
-            val steps = if (cursor == today) maxOf(base.steps, byDay[cursor]?.steps ?: 0) else byDay[cursor]?.steps ?: 0
-            if (steps >= base.goal && steps > 0) {
+            val daySteps = if (cursor == today) steps else byDay[cursor]?.steps ?: 0
+            if (daySteps >= base.goal && daySteps > 0) {
                 streak++
                 cursor--
             } else {
@@ -229,16 +241,22 @@ object WidgetRepository {
             }
         }
 
-        val todaySummary = byDay[today]
         val snapshot = base.copy(
-            calories = maxOf(base.calories, todaySummary?.calories?.toInt() ?: 0),
-            distanceMeters = maxOf(base.distanceMeters, ((todaySummary?.distanceKm ?: 0f) * 1000f).toInt()),
-            activeMinutes = maxOf(base.activeMinutes, todaySummary?.activeMinutes ?: 0),
+            steps = steps,
+            calories = calories,
+            distanceMeters = distanceMeters,
+            activeMinutes = activeMinutes,
             week = week,
             streakDays = streak
         )
         runCatching {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putLong(KEY_DATE, today)
+                .putInt(KEY_STEPS, steps)
+                .putInt(KEY_CALORIES, calories)
+                .putInt(KEY_DISTANCE, distanceMeters)
+                .putInt(KEY_MINUTES, activeMinutes)
+                .putInt(KEY_DAY_PREFIX + today, steps)
                 .putInt(KEY_STREAK, streak)
                 .apply()
         }
