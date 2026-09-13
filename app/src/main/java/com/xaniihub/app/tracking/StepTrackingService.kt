@@ -89,6 +89,12 @@ class StepTrackingService : Service(), SensorEventListener {
         // sticky restart), so make sure the sensor listener is attached in those cases too -
         // otherwise the foreground notification stays up while nothing is being counted.
         registerSensorListener()
+        // The step counter is an on-change sensor, so without an explicit trigger the notification
+        // would keep showing the numbers of the last sensor batch after the body params - and with
+        // them the calorie estimate - were edited in the profile.
+        if (intent?.action == ACTION_REFRESH) {
+            scope.launch { ingestMutex.withLock { runCatching { publishSnapshot() } } }
+        }
         return START_STICKY
     }
 
@@ -255,8 +261,24 @@ class StepTrackingService : Service(), SensorEventListener {
     companion object {
         private const val DATE_CHECK_INTERVAL_MS = 60_000L
 
+        /** Asks the tracker to repaint the notification, the widget cache and the widgets. */
+        const val ACTION_REFRESH = "com.xaniihub.app.tracking.action.REFRESH"
+
         fun start(context: Context) {
             val intent = Intent(context, StepTrackingService::class.java)
+            runCatching {
+                ContextCompat.startForegroundService(context, intent)
+            }
+        }
+
+        /**
+         * Republishes today's numbers after something other than the sensor changed them, such as
+         * editing the weight in the profile, which rewrites the stored calories and distance.
+         */
+        fun refresh(context: Context) {
+            val intent = Intent(context, StepTrackingService::class.java).apply {
+                action = ACTION_REFRESH
+            }
             runCatching {
                 ContextCompat.startForegroundService(context, intent)
             }
