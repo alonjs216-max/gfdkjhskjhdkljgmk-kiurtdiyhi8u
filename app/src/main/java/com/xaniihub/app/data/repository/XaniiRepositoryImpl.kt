@@ -142,7 +142,9 @@ class XaniiRepositoryImpl @Inject constructor(
                 dailyGoal = effectiveGoal,
                 distanceKm = summary.distanceKm,
                 calories = summary.calories,
-                activeMinutes = summary.activeMinutes,
+                // Derived from the raw readings of the day whenever they are still around, so a
+                // stored value that predates the active minute fix cannot keep being displayed.
+                activeMinutes = if (events.isEmpty()) summary.activeMinutes else activeMinutesForDay(events),
                 streakDays = streaks.current,
                 lifetimeSteps = lifetime,
                 hourlySteps = hourlyStepsOf(date, events),
@@ -443,17 +445,17 @@ class XaniiRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Rebuilds the stored per-day distance and calories from the immutable step events with
-     * [body]. Steps and active minutes do not depend on the body params, so they are kept as is,
-     * and days without stored events keep whatever they had.
+     * Rebuilds the stored per-day distance, calories and active minutes from the immutable step
+     * events with [body]. Steps do not depend on the body params, so they are kept as is, and
+     * days without stored events keep whatever they had.
      */
     private suspend fun recalculateDerivedMetrics(body: BodyParamsEntity) {
         withContext(Dispatchers.IO) {
             ingestMutex.withLock {
                 val updated = mutableListOf<DailySummaryEntity>()
                 stepDao.getAllSummaries().forEach { summary ->
-                    val events = stepDao.getEventsForDay(summary.dateEpochDay)
-                        .filter { it.stepsDelta > 0 }
+                    val dayEvents = stepDao.getEventsForDay(summary.dateEpochDay)
+                    val events = dayEvents.filter { it.stepsDelta > 0 }
                     if (events.isEmpty()) return@forEach
                     var distanceKm = 0f
                     var calories = 0f
@@ -466,8 +468,16 @@ class XaniiRepositoryImpl @Inject constructor(
                             cadence = event.cadence
                         )
                     }
-                    if (summary.distanceKm != distanceKm || summary.calories != calories) {
-                        updated += summary.copy(distanceKm = distanceKm, calories = calories)
+                    val activeMinutes = activeMinutesForDay(dayEvents)
+                    if (summary.distanceKm != distanceKm ||
+                        summary.calories != calories ||
+                        summary.activeMinutes != activeMinutes
+                    ) {
+                        updated += summary.copy(
+                            distanceKm = distanceKm,
+                            calories = calories,
+                            activeMinutes = activeMinutes
+                        )
                     }
                 }
                 // One transactional write instead of one per day, so the history is never left
@@ -521,6 +531,7 @@ class XaniiRepositoryImpl @Inject constructor(
                     .apply()
 
                 pruneStaleEvents(prefs)
+                repairActiveMinutes(prefs)
 
                 if (delta <= 0) return@withLock
 
@@ -555,8 +566,10 @@ class XaniiRepositoryImpl @Inject constructor(
                                 heightCm = heightCm,
                                 cadence = cadence
                             ),
-                            activeMinutes = ((current?.activeMinutes ?: 0) + activeMinutesOf(segment.steps, segment.durationMs))
-                                .coerceAtMost(MINUTES_PER_DAY),
+                            // Recomputed from all readings of the day instead of accumulating a
+                            // per-reading value: rounding every batch up to a whole minute made
+                            // the timer race far ahead of the time actually spent walking.
+                            activeMinutes = activeMinutesForDay(stepDao.getEventsForDay(segment.dateEpochDay)),
                             // The goal the streak judges this day against. A day that already has
                             // one keeps it, so backfilled days never change an earned streak.
                             goal = current?.goal?.takeIf { it > 0 } ?: dailyGoal
@@ -570,16 +583,22 @@ class XaniiRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Upper bound for a single reading, derived from the time it covers. The flat 50 000 step cap
-     * was wrong in both directions: it accepted an impossible 50 000 step jump within a minute,
-     * and it silently discarded real steps when the counter had been running for days without
-     * the app. The bound follows the elapsed time at a cadence nobody can sustain, with a floor
-     * for batched readings and a ceiling for absurd counter resets.
+     * Upper bound for a single reading, derived from the time it covers. A flat cap was wrong in
+     * both directions: it accepted an impossible jump within a minute, and it silently discarded
+     * real steps when the counter had been running for a long time without the app.
+     *
+     * The peak cadence can only be claimed for short readings. Nobody keeps running at 250 steps
+     * per minute for hours, so longer gaps - a night in Doze, a day with the service killed -
+     * are bounded by a sustained cadence and by a realistic daily ceiling; otherwise the first
+     * reading of the morning could credit a six figure step count for a night of sleep.
      */
     private fun maxPlausibleDelta(previousEventTime: Long, eventTime: Long): Int {
         if (previousEventTime <= 0L || eventTime <= previousEventTime) return MIN_PLAUSIBLE_DELTA
         val gapMinutes = (eventTime - previousEventTime) / 60_000L
-        return (gapMinutes * MAX_STEPS_PER_MINUTE)
+        val burstMinutes = minOf(gapMinutes, MAX_BURST_MINUTES)
+        val sustainedMinutes = (gapMinutes - burstMinutes).coerceAtLeast(0L)
+        val bound = burstMinutes * MAX_STEPS_PER_MINUTE + sustainedMinutes * SUSTAINED_STEPS_PER_MINUTE
+        return bound
             .coerceIn(MIN_PLAUSIBLE_DELTA.toLong(), MAX_PLAUSIBLE_DELTA.toLong())
             .toInt()
     }
@@ -595,6 +614,26 @@ class XaniiRepositoryImpl @Inject constructor(
         if (prefs.getLong(PREF_LAST_PRUNE_DAY, Long.MIN_VALUE) == today) return
         stepDao.pruneEventsBefore(today - EVENT_RETENTION_DAYS)
         prefs.edit().putLong(PREF_LAST_PRUNE_DAY, today).apply()
+    }
+
+    /**
+     * Rewrites the active minutes that were stored by the old per-reading accumulation, which
+     * charged a full minute for every batch of steps. Runs once, over the days that still have
+     * their raw readings; days whose events were already pruned keep their stored value.
+     */
+    private suspend fun repairActiveMinutes(prefs: SharedPreferences) {
+        if (prefs.getBoolean(PREF_ACTIVE_MINUTES_REPAIRED, false)) return
+        val updated = mutableListOf<DailySummaryEntity>()
+        stepDao.getAllSummaries().forEach { summary ->
+            val events = stepDao.getEventsForDay(summary.dateEpochDay)
+            if (events.isEmpty()) return@forEach
+            val activeMinutes = activeMinutesForDay(events)
+            if (activeMinutes != summary.activeMinutes) {
+                updated += summary.copy(activeMinutes = activeMinutes)
+            }
+        }
+        if (updated.isNotEmpty()) stepDao.upsertDailySummaries(updated)
+        prefs.edit().putBoolean(PREF_ACTIVE_MINUTES_REPAIRED, true).apply()
     }
 
     /**
@@ -695,16 +734,32 @@ class XaniiRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Active minutes contributed by one reading. Counting distinct minute buckets of the event
-     * timestamps (the previous SQL approach) turned every single reading into a full active
-     * minute, so a handful of steps could add tens of minutes of "activity".
+     * Active time of a whole day, in minutes, derived from its raw readings.
+     *
+     * Every reading contributes the time it can plausibly account for: the span it covers, but
+     * never more than the time its steps need at a walking cadence. The previous implementation
+     * accumulated one rounded value per reading with a floor of a full minute, so the step
+     * counter - an on-change sensor that fires constantly while walking - turned a few thousand
+     * steps into hours of "activity". Summing seconds and rounding once at the end removes that
+     * bias entirely.
      */
-    private fun activeMinutesOf(steps: Int, durationMs: Long): Int {
-        if (steps <= 0) return 0
-        val plausibleMinutes = ceilDiv(steps.toLong(), STEPS_PER_ACTIVE_MINUTE)
-        val coveredMinutes = if (durationMs > 0L) ceilDiv(durationMs, 60_000L) else plausibleMinutes
-        return minOf(plausibleMinutes, coveredMinutes)
-            .coerceIn(1L, MINUTES_PER_DAY.toLong())
+    private fun activeMinutesForDay(events: List<StepEventEntity>): Int {
+        var activeSeconds = 0L
+        var previousTimestamp = 0L
+        events.sortedBy { it.timestamp }.forEach { event ->
+            if (event.stepsDelta > 0) {
+                val plausibleSeconds = ceilDiv(event.stepsDelta.toLong() * 60L, STEPS_PER_ACTIVE_MINUTE)
+                val coveredSeconds = if (previousTimestamp in 1L until event.timestamp) {
+                    (event.timestamp - previousTimestamp) / 1_000L
+                } else {
+                    plausibleSeconds
+                }
+                activeSeconds += minOf(plausibleSeconds, coveredSeconds)
+            }
+            previousTimestamp = maxOf(previousTimestamp, event.timestamp)
+        }
+        return ceilDiv(activeSeconds, 60L)
+            .coerceIn(0L, MINUTES_PER_DAY.toLong())
             .toInt()
     }
 
@@ -874,8 +929,12 @@ class XaniiRepositoryImpl @Inject constructor(
         const val MIN_MONTHLY_GOAL = 30_000L
         const val MAX_MONTHLY_GOAL = 3_000_000L
         const val MIN_PLAUSIBLE_DELTA = 1_000
-        const val MAX_PLAUSIBLE_DELTA = 250_000
+        /** No day of walking reaches this, so a bigger jump is a counter glitch, not steps. */
+        const val MAX_PLAUSIBLE_DELTA = 60_000
         const val MAX_STEPS_PER_MINUTE = 250L
+        /** Cadence a reading is allowed to claim beyond [MAX_BURST_MINUTES] of its span. */
+        const val SUSTAINED_STEPS_PER_MINUTE = 30L
+        const val MAX_BURST_MINUTES = 60L
         const val MAX_SPLIT_WINDOW_MS = 7L * 24L * 60L * 60L * 1_000L
         const val MAX_SPLIT_SEGMENTS = 8
         const val MIN_CADENCE_WINDOW_MS = 5_000L
@@ -891,5 +950,6 @@ class XaniiRepositoryImpl @Inject constructor(
         const val MIN_FORECAST_MINUTES = 120
         const val MAX_DAILY_FORECAST = 200_000
         const val PREF_LAST_PRUNE_DAY = "last_prune_epoch_day"
+        const val PREF_ACTIVE_MINUTES_REPAIRED = "active_minutes_repaired_v2"
     }
 }
