@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,6 +51,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.xaniihub.app.domain.model.BodyParams
 import com.xaniihub.app.domain.model.GenderType
+import com.xaniihub.app.domain.profile.ProfileSetupState
 import com.xaniihub.app.ui.components.MiniTrendLine
 import com.xaniihub.app.ui.components.PremiumCard
 import com.xaniihub.app.localization.AppLanguage
@@ -60,6 +62,7 @@ import com.xaniihub.app.ui.theme.AppThemeController
 import com.xaniihub.app.ui.theme.AppThemePalette
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileScreen(
@@ -68,6 +71,7 @@ fun ProfileScreen(
     onSaveParams: (BodyParams) -> Unit,
     onWeightSave: (Float) -> Unit
 ) {
+    val context = LocalContext.current
     var weight by remember(state.bodyParams.weightKg) { mutableStateOf(formatEditableNumber(state.bodyParams.weightKg)) }
     var height by remember(state.bodyParams.heightCm) { mutableStateOf(state.bodyParams.heightCm.toString()) }
     var age by remember(state.bodyParams.age) { mutableStateOf(state.bodyParams.age.toString()) }
@@ -100,6 +104,15 @@ fun ProfileScreen(
         PremiumCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(appText("body_parameters"), style = MaterialTheme.typography.titleLarge)
+                // Onboarding no longer invents a body when it is skipped, so this is the place
+                // where the app asks for the real weight instead of silently pretending it has it.
+                if (!ProfileSetupState.bodyParamsProvided) {
+                    Text(
+                        appText("profile_weight_hint"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
                 val weightInvalid = weight.toFloatOrNull()?.let { it !in 25f..350f } ?: true
                 val heightInvalid = height.toIntOrNull()?.let { it !in 100..250 } ?: true
                 val ageInvalid = age.toIntOrNull()?.let { it !in 13..120 } ?: true
@@ -190,6 +203,8 @@ fun ProfileScreen(
                                     targetWeightKg = targetWeight.toFloat()
                                 )
                             )
+                            // These are the user's own numbers now, so the reminder disappears.
+                            ProfileSetupState.setBodyParamsProvided(context, true)
                             paramsSaveAttempted = false
                         }
                     }
@@ -206,13 +221,15 @@ fun ProfileScreen(
                     StatCell(
                         modifier = Modifier.weight(1f),
                         title = "BMI",
-                        value = if (state.bmi <= 0f) "—" else "%.1f".format(state.bmi),
+                        // Without an explicit locale this followed the system language, so a
+                        // Russian UI could print "22.4" next to "22,4" elsewhere on the screen.
+                        value = if (state.bmi <= 0f) "—" else "%.1f".format(appLocale(), state.bmi),
                         subtitle = bmiLabel(state.bmi)
                     )
                     StatCell(
                         modifier = Modifier.weight(1f),
                         title = "BMR",
-                        value = "${state.bmr}",
+                        value = formatInt(state.bmr),
                         subtitle = appText("kcal_per_day")
                     )
                 }
@@ -220,16 +237,23 @@ fun ProfileScreen(
                     StatCell(
                         modifier = Modifier.weight(1f),
                         title = "TDEE",
-                        value = "${state.tdee}",
-                        subtitle = appText("kcal_per_day")
+                        value = formatInt(state.tdee),
+                        subtitle = appText("calories_total_day")
                     )
                     StatCell(
                         modifier = Modifier.weight(1f),
-                        title = appText("burned"),
-                        value = "${state.burnedToday}",
-                        subtitle = appText("burned_today")
+                        // "Burned / today kcal" sat next to BMR and TDEE without saying that it
+                        // counts only the walking, which made the three numbers look contradictory.
+                        title = appText("calories_from_steps"),
+                        value = formatInt(state.burnedToday),
+                        subtitle = appText("kcal")
                     )
                 }
+                Text(
+                    appText("calories_hint"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
@@ -362,6 +386,8 @@ private fun ThemePaletteRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    // These swatches are previews of each palette, so the literal colours are the content here -
+    // they intentionally do not follow the currently applied theme.
     val colors = when (palette) {
         AppThemePalette.MONO -> listOf(Color.White, Color(0xFF9E9E9E), Color(0xFF2A2A2A))
         AppThemePalette.CYAN -> listOf(Color(0xFF00D9FF), Color(0xFF3BE7FF), Color(0xFF083846))
@@ -411,7 +437,14 @@ private fun MyDayStepsCard(
     val todaySteps = state.dashboardStats?.steps ?: 0
     val usualSteps = state.analyticsOverview?.averageSteps ?: state.stepHistory.takeLast(30).filter { it > 0 }.averageInt()
     val delta = todaySteps - usualSteps
-    val progress = java.time.LocalTime.now().toSecondOfDay() / 86_400f
+    // LocalTime.now() read straight from the composable body froze the "now" marker at whatever
+    // time the screen was opened. A ticker aligned to the minute boundary keeps it moving.
+    val progress by produceState(initialValue = currentDayProgress()) {
+        while (true) {
+            value = currentDayProgress()
+            delay(60_000L - System.currentTimeMillis() % 60_000L)
+        }
+    }
     val history = state.dashboardStats?.hourlySteps?.take(24)?.ifEmpty { null } ?: List(24) { 0 }
 
     PremiumCard(modifier = modifier) {
@@ -468,6 +501,9 @@ private fun DynamicsStepsCard(
     val currentValues = state.stepHistory.takeLast(periodSize).ifEmpty { listOf(0) }
     val previousValues = state.stepHistory.dropLast(periodSize).takeLast(periodSize)
     val currentAverage = currentValues.averageInt()
+    // The history window is not always long enough to hold two full periods (for a year it never
+    // is), and printing a bare 0 made it look like the user had walked nothing back then.
+    val hasPreviousPeriod = previousValues.any { it > 0 }
     val previousAverage = previousValues.averageInt()
     val delta = currentAverage - previousAverage
     val isPositive = delta >= 0
@@ -492,19 +528,25 @@ private fun DynamicsStepsCard(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(formatInt(previousAverage), style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        if (hasPreviousPeriod) formatInt(previousAverage) else "—",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(appText("previous_period"), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(formatInt(currentAverage), style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onSurface)
                     Text(appText("current_period"), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    DeltaBadge(delta = delta, positive = isPositive)
+                    if (hasPreviousPeriod) {
+                        DeltaBadge(delta = delta, positive = isPositive)
+                    }
                 }
             }
 
             DynamicsLineChart(values = currentValues, modifier = Modifier.fillMaxWidth())
 
-            val comparisonText = if (previousAverage == 0) {
+            val comparisonText = if (!hasPreviousPeriod) {
                 appText("dyn_no_compare").format(formatInt(currentAverage))
             } else if (isPositive) {
                 appText("dyn_more").format(formatInt(currentAverage), formatInt(delta))
@@ -577,6 +619,8 @@ private fun DayProgressChart(
     val primary = MaterialTheme.colorScheme.primary
     val muted = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
     val track = MaterialTheme.colorScheme.outline.copy(alpha = 0.28f)
+    // Was Color.White, which turned into an invisible dot on a light theme.
+    val markerCore = MaterialTheme.colorScheme.background
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier) {
         Canvas(modifier = Modifier.fillMaxWidth().height(170.dp)) {
@@ -599,7 +643,7 @@ private fun DayProgressChart(
             val markerX = size.width * progress.coerceIn(0f, 1f)
             drawLine(muted, Offset(markerX, size.height * 0.22f), Offset(markerX, baseline + lineStroke), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             drawCircle(primary, radius = 9.dp.toPx(), center = Offset(markerX, baseline))
-            drawCircle(Color.White, radius = 5.dp.toPx(), center = Offset(markerX, baseline))
+            drawCircle(markerCore, radius = 5.dp.toPx(), center = Offset(markerX, baseline))
             drawCircle(primary, radius = 3.dp.toPx(), center = Offset(markerX, baseline))
         }
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -636,7 +680,7 @@ private fun DynamicsLineChart(
     modifier: Modifier = Modifier
 ) {
     val primary = MaterialTheme.colorScheme.primary
-    val secondary = Color(0xFF5EF05D)
+    val secondary = MaterialTheme.colorScheme.tertiary
     val grid = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)
     val fill = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
     val safeValues = values.ifEmpty { listOf(0, 0) }
@@ -726,11 +770,18 @@ private fun StatCell(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value, style = MaterialTheme.typography.titleLarge)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum"),
+                maxLines = 1
+            )
             Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
+
+private fun currentDayProgress(): Float =
+    java.time.LocalTime.now().toSecondOfDay() / 86_400f
 
 private fun formatEditableNumber(value: Float): String =
     if (value % 1f == 0f) value.toInt().toString() else value.toString()

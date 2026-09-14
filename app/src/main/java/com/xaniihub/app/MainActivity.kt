@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import com.xaniihub.app.ui.theme.AppThemeController
 import com.xaniihub.app.ui.theme.XaniiHubTheme
 import com.xaniihub.app.localization.AppLanguage
 import com.xaniihub.app.localization.AppLanguageController
+import com.xaniihub.app.localization.appLocale
 import com.xaniihub.app.localization.appText
 import androidx.compose.material3.Slider
 import androidx.compose.material3.TextButton
@@ -68,6 +70,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.xaniihub.app.domain.model.BodyParams
 import com.xaniihub.app.domain.model.GenderType
+import com.xaniihub.app.domain.profile.ProfileSetupState
 import com.xaniihub.app.ui.onboarding.OnboardingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -79,6 +82,9 @@ class MainActivity : ComponentActivity() {
         // first-frame flash with the default language and palette.
         AppLanguageController.init(this)
         AppThemeController.init(this)
+        // Installations that already passed onboarding went through a profile write, so they are
+        // treated as "parameters provided" and never see the reminder about the missing weight.
+        ProfileSetupState.init(this, assumeProvided = AppLanguageController.onboarded)
         enableEdgeToEdge()
         setContent {
             XaniiHubTheme {
@@ -225,12 +231,19 @@ private fun LanguageButton(title: String, onClick: () -> Unit) {
     ) { Text(title, color = MaterialTheme.colorScheme.onSurface) }
 }
 
+private fun hasActivityRecognitionPermission(context: android.content.Context): Boolean =
+    ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACTIVITY_RECOGNITION
+    ) == PackageManager.PERMISSION_GRANTED
+
 @Composable
 private fun PermissionGate(
     onReady: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? MainActivity
     val preferences = remember {
         context.getSharedPreferences("permission_gate", android.content.Context.MODE_PRIVATE)
     }
@@ -247,49 +260,54 @@ private fun PermissionGate(
         }.toTypedArray()
     }
     var activityPermissionGranted by remember {
+        mutableStateOf(hasActivityRecognitionPermission(context))
+    }
+    // shouldShowRequestPermissionRationale() used to be called straight from the composable body,
+    // i.e. a binder call into the package manager on every single recomposition. Its answer can
+    // only change after a permission dialog or a trip to the system settings, so it is kept in
+    // state and refreshed at exactly those two moments.
+    var shouldShowActivityRationale by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
+            activity?.shouldShowRequestPermissionRationale(
                 Manifest.permission.ACTIVITY_RECOGNITION
-            ) == PackageManager.PERMISSION_GRANTED
+            ) ?: false
         )
     }
     val hasStepCounterSensor = remember(context) {
         (context.getSystemService(android.content.Context.SENSOR_SERVICE) as? SensorManager)
             ?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
     }
+    // Without a step sensor the app used to end on a screen with no buttons at all: no way in,
+    // no way out. The rest of the app (history, goals, profile, manual weight) still works, so
+    // the user can now decide to continue without automatic counting - or simply leave.
+    var continueWithoutSensor by rememberSaveable { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                activityPermissionGranted = ContextCompat.checkSelfPermission(
-                    context,
+                activityPermissionGranted = hasActivityRecognitionPermission(context)
+                shouldShowActivityRationale = activity?.shouldShowRequestPermissionRationale(
                     Manifest.permission.ACTIVITY_RECOGNITION
-                ) == PackageManager.PERMISSION_GRANTED
+                ) ?: false
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    val activity = context as? MainActivity
-    val shouldShowActivityRationale = activity?.shouldShowRequestPermissionRationale(
-        Manifest.permission.ACTIVITY_RECOGNITION
-    ) ?: false
     val needsSettings = !activityPermissionGranted &&
         activityPermissionRequested &&
         !shouldShowActivityRationale
 
-    lateinit var requestPermissions: () -> Unit
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = {
-            activityPermissionGranted = ContextCompat.checkSelfPermission(
-                context,
+            activityPermissionGranted = hasActivityRecognitionPermission(context)
+            shouldShowActivityRationale = activity?.shouldShowRequestPermissionRationale(
                 Manifest.permission.ACTIVITY_RECOGNITION
-            ) == PackageManager.PERMISSION_GRANTED
+            ) ?: false
         }
     )
-    requestPermissions = {
+    val requestPermissions: () -> Unit = {
         activityPermissionRequested = true
         preferences.edit().putBoolean("activity_permission_requested", true).apply()
         launcher.launch(requestedPermissions)
@@ -307,21 +325,27 @@ private fun PermissionGate(
         }
     }
 
-    if (activityPermissionGranted && hasStepCounterSensor) {
+    if (activityPermissionGranted && (hasStepCounterSensor || continueWithoutSensor)) {
         content()
     } else if (activityPermissionGranted) {
-        SensorUnavailableScreen()
+        SensorUnavailableScreen(
+            onContinue = { continueWithoutSensor = true },
+            onExit = { activity?.finish() }
+        )
     } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .safeDrawingPadding()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = appText(if (needsSettings) "permission_settings" else "permission"),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center
             )
             Button(
                 modifier = Modifier.padding(top = 16.dp),
@@ -344,11 +368,15 @@ private fun PermissionGate(
 }
 
 @Composable
-private fun SensorUnavailableScreen() {
+private fun SensorUnavailableScreen(
+    onContinue: () -> Unit,
+    onExit: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -364,6 +392,22 @@ private fun SensorUnavailableScreen() {
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
+        Text(
+            text = appText("sensor_unavailable_hint"),
+            modifier = Modifier.padding(top = 12.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            onClick = onContinue
+        ) { Text(appText("continue_without_tracking")) }
+        TextButton(onClick = onExit) {
+            Text(appText("exit_app"))
+        }
     }
 }
 
@@ -371,32 +415,51 @@ private fun SensorUnavailableScreen() {
 private fun OnboardingScreen(onFinish: () -> Unit) {
     val context = LocalContext.current
     val viewModel: OnboardingViewModel = hiltViewModel()
-    var step by remember { mutableStateOf(0) }
+    // Every answer lives in rememberSaveable: a rotation, a split-screen resize or a short trip
+    // to another app used to drop the whole form back to its defaults without a word.
+    var step by rememberSaveable { mutableStateOf(0) }
     val lastStep = 5
 
-    var gender by remember { mutableStateOf(GenderType.OTHER) }
-    var age by remember { mutableStateOf("27") }
-    var height by remember { mutableStateOf("175") }
-    var weight by remember { mutableStateOf("70") }
-    var activity by remember { mutableStateOf(1.2f) }
-    var stepGoal by remember { mutableStateOf(8000f) }
+    // Enums are not saveable out of the box, so the selection travels as its name.
+    var genderName by rememberSaveable { mutableStateOf(GenderType.OTHER.name) }
+    val gender = remember(genderName) {
+        runCatching { GenderType.valueOf(genderName) }.getOrDefault(GenderType.OTHER)
+    }
+    var age by rememberSaveable { mutableStateOf("27") }
+    var height by rememberSaveable { mutableStateOf("175") }
+    var weight by rememberSaveable { mutableStateOf("70") }
+    var activity by rememberSaveable { mutableStateOf(1.2f) }
+    var stepGoal by rememberSaveable { mutableStateOf(8000f) }
+    val defaults = remember { BodyParams() }
+
     val finishOnboarding: () -> Unit = {
         val goal = stepGoal.toInt()
+        val enteredWeight = weight.toDecimalOrNull()
         viewModel.complete(
             params = BodyParams(
-                weightKg = weight.toFloatOrNull() ?: 70f,
-                heightCm = height.toIntOrNull() ?: 175,
-                age = age.toIntOrNull() ?: 27,
+                weightKg = enteredWeight ?: defaults.weightKg,
+                heightCm = height.toIntOrNull() ?: defaults.heightCm,
+                age = age.toIntOrNull() ?: defaults.age,
                 gender = gender,
                 activityMultiplier = activity,
-                targetWeightKg = weight.toFloatOrNull() ?: 70f
+                targetWeightKg = enteredWeight ?: defaults.targetWeightKg
             ),
             dailyGoal = goal,
             onComplete = {
                 GoalTypesController.setStepGoal(context, goal)
+                ProfileSetupState.setBodyParamsProvided(context, enteredWeight != null)
                 onFinish()
             }
         )
+    }
+    // "Skip" used to call finishOnboarding(), i.e. it silently saved 70 kg / 175 cm / 27 years /
+    // x1.2 as if the user had confirmed them - and every calorie number was then computed for
+    // that invented body, which is exactly the complaint that started this whole series of
+    // fixes. Skipping now writes nothing: the repository keeps using its own fallbacks for the
+    // calculation and the profile screen asks for a real weight instead.
+    val skipOnboarding: () -> Unit = {
+        ProfileSetupState.setBodyParamsProvided(context, false)
+        onFinish()
     }
 
     Column(
@@ -461,13 +524,15 @@ private fun OnboardingScreen(onFinish: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OnbChip(appText("onb_gender_male"), gender == GenderType.MALE, Modifier.weight(1f)) { gender = GenderType.MALE }
-                    OnbChip(appText("onb_gender_female"), gender == GenderType.FEMALE, Modifier.weight(1f)) { gender = GenderType.FEMALE }
-                    OnbChip(appText("onb_gender_other"), gender == GenderType.OTHER, Modifier.weight(1f)) { gender = GenderType.OTHER }
+                    OnbChip(appText("onb_gender_male"), gender == GenderType.MALE, Modifier.weight(1f)) { genderName = GenderType.MALE.name }
+                    OnbChip(appText("onb_gender_female"), gender == GenderType.FEMALE, Modifier.weight(1f)) { genderName = GenderType.FEMALE.name }
+                    OnbChip(appText("onb_gender_other"), gender == GenderType.OTHER, Modifier.weight(1f)) { genderName = GenderType.OTHER.name }
                 }
                 OnbNumberField(appText("onb_age"), age, appText("unit_years")) { age = it }
                 OnbNumberField(appText("onb_height"), height, appText("unit_cm")) { height = it }
-                OnbNumberField(appText("onb_weight"), weight, appText("unit_kg")) { weight = it }
+                // Weight is the one body parameter that is rarely a whole number, and a Russian
+                // keyboard produces a comma: both separators are accepted now.
+                OnbNumberField(appText("onb_weight"), weight, appText("unit_kg"), decimal = true) { weight = it }
             }
             3 -> {
                 Spacer(Modifier.height(8.dp))
@@ -485,7 +550,7 @@ private fun OnboardingScreen(onFinish: () -> Unit) {
             4 -> {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = stepGoal.toInt().toString() + " " + appText("unit_steps"),
+                    text = formatStepCount(stepGoal.toInt()) + " " + appText("unit_steps"),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -512,8 +577,16 @@ private fun OnboardingScreen(onFinish: () -> Unit) {
         }
 
         if (step < lastStep) {
-            TextButton(onClick = finishOnboarding) {
+            TextButton(onClick = skipOnboarding) {
                 Text(appText("onb_skip"))
+            }
+            if (step >= 2) {
+                Text(
+                    text = appText("onb_skip_hint"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
@@ -553,15 +626,20 @@ private fun OnbNumberField(
     label: String,
     value: String,
     unit: String,
+    decimal: Boolean = false,
     onChange: (String) -> Unit
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { onChange(it.filter(Char::isDigit)) },
+        onValueChange = {
+            onChange(if (decimal) sanitizeDecimalInput(it) else it.filter(Char::isDigit))
+        },
         label = { Text(label) },
         trailingIcon = { Text(unit) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number
+        ),
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -597,4 +675,30 @@ private fun OnbActivityOption(
             )
         }
     }
+}
+
+private fun formatStepCount(value: Int): String =
+    java.text.NumberFormat.getIntegerInstance(appLocale()).format(value)
+
+/**
+ * Parses a number the user typed, accepting both separators: a Russian keyboard produces "70,5"
+ * while [String.toFloatOrNull] only understands "70.5".
+ */
+private fun String.toDecimalOrNull(): Float? =
+    trim().replace(',', '.').takeIf { it.isNotEmpty() }?.toFloatOrNull()
+
+/** Keeps digits and at most one separator, so "7,,5" or "--" can never reach the parser. */
+private fun sanitizeDecimalInput(raw: String): String {
+    val builder = StringBuilder()
+    var separatorUsed = false
+    raw.forEach { char ->
+        when {
+            char.isDigit() -> builder.append(char)
+            (char == '.' || char == ',') && !separatorUsed && builder.isNotEmpty() -> {
+                separatorUsed = true
+                builder.append(char)
+            }
+        }
+    }
+    return builder.toString()
 }
