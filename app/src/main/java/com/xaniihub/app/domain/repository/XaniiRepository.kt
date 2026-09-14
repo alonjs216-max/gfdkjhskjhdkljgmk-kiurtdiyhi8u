@@ -10,11 +10,20 @@ import com.xaniihub.app.domain.model.GoalProgress
 import com.xaniihub.app.domain.model.MiniChallenge
 import com.xaniihub.app.domain.model.TrackingSnapshot
 import com.xaniihub.app.domain.model.WeightPoint
+import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 
 interface XaniiRepository {
     fun observeDashboardStats(): Flow<DashboardStats>
-    fun observeDashboardStatsForDate(date: java.time.LocalDate): Flow<DashboardStats>
+    fun observeDashboardStatsForDate(date: LocalDate): Flow<DashboardStats>
+
+    /**
+     * The current calendar day, re-emitted when it changes. Exposed so that the screens share
+     * the single ticker of the repository instead of each starting its own polling loop with
+     * slightly different behaviour around midnight, time zone changes and manual clock edits.
+     */
+    fun observeCurrentDate(): Flow<LocalDate>
+
     suspend fun setDailyGoal(goal: Int)
     suspend fun setGoals(config: GoalConfig)
     fun observeGoalConfig(): Flow<GoalConfig>

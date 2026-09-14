@@ -28,7 +28,7 @@ import com.xaniihub.app.data.local.entity.WeightEntryEntity
         ChallengeProgressEntity::class,
         CustomChallengeEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class XaniiHubDatabase : RoomDatabase() {
@@ -79,6 +79,21 @@ abstract class XaniiHubDatabase : RoomDatabase() {
                     ), 0)
                     """.trimIndent()
                 )
+            }
+        }
+
+        /**
+         * Version 4 makes the streak goal aware. Every day keeps the daily goal it was recorded
+         * with, so editing the goal no longer rewrites which of the past days count as
+         * completed, and the raw events finally get the index every query of them relies on.
+         */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `daily_summary` ADD COLUMN `goal` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_step_events_dateEpochDay` ON `step_events` (`dateEpochDay`)")
+                // The goal was never stored per day, so the current one is the only available
+                // approximation for the existing history.
+                database.execSQL("UPDATE `daily_summary` SET `goal` = COALESCE((SELECT `daily` FROM `goals` WHERE `id` = 0), 8000)")
             }
         }
     }

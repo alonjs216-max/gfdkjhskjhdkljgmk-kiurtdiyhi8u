@@ -6,16 +6,18 @@ import com.xaniihub.app.domain.model.AnalyticsOverview
 
 import com.xaniihub.app.domain.model.BodyParams
 import com.xaniihub.app.domain.model.DashboardStats
+import com.xaniihub.app.domain.model.GenderType
 import com.xaniihub.app.domain.model.WeightPoint
 import com.xaniihub.app.domain.repository.XaniiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
@@ -35,33 +37,53 @@ class ProfileViewModel @Inject constructor(
     private val repository: XaniiRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    /** BMI, BMR and TDEE depend on the body parameters only. */
+    private data class BodyMetrics(
+        val params: BodyParams,
+        val bmi: Float,
+        val bmr: Int,
+        val tdee: Int
+    )
 
-    init {
-        combine(
-            repository.observeBodyParams(),
-            repository.observeWeightTrend(),
-            repository.observeDashboardStats(),
-            repository.observeAnalyticsOverview(),
-            repository.observeDailyHeatMap()
-        ) { params, trend, dashboard, analytics, heatMap ->
-            val bmi = calculateBmi(params.weightKg, params.heightCm)
-            ProfileUiState(
-                bodyParams = params,
-                weightTrend = trend,
-                dashboardStats = dashboard,
-                analyticsOverview = analytics,
-                stepHistory = heatMap,
-                bmi = bmi,
+    // The dashboard flow emits on every sensor update, and the old single combine recomputed all
+    // three formulas each time. Deriving them from the body parameters alone means they are
+    // recalculated only when the user actually edits weight, height, age, sex or activity.
+    private val bodyMetrics: Flow<BodyMetrics> = repository.observeBodyParams()
+        .distinctUntilChanged()
+        .map { params ->
+            BodyMetrics(
+                params = params,
+                bmi = calculateBmi(params.weightKg, params.heightCm),
                 bmr = calculateBmr(params),
-                tdee = calculateTdee(params),
-                burnedToday = dashboard.calories.toInt()
+                tdee = calculateTdee(params)
             )
-        }.onEach {
-            _uiState.value = it
-        }.launchIn(viewModelScope)
-    }
+        }
+
+    val uiState: StateFlow<ProfileUiState> = combine(
+        bodyMetrics,
+        repository.observeWeightTrend(),
+        repository.observeDashboardStats(),
+        repository.observeAnalyticsOverview(),
+        repository.observeDailyHeatMap()
+    ) { metrics, trend, dashboard, analytics, heatMap ->
+        ProfileUiState(
+            bodyParams = metrics.params,
+            weightTrend = trend,
+            dashboardStats = dashboard,
+            analyticsOverview = analytics,
+            stepHistory = heatMap,
+            bmi = metrics.bmi,
+            bmr = metrics.bmr,
+            tdee = metrics.tdee,
+            burnedToday = dashboard.calories.toInt()
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        // Keeps the state alive across configuration changes, but stops the upstream flows when
+        // the profile screen is no longer being observed.
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ProfileUiState()
+    )
 
     fun saveParams(params: BodyParams) {
         viewModelScope.launch {
@@ -85,9 +107,9 @@ class ProfileViewModel @Inject constructor(
     private fun calculateBmr(params: BodyParams): Int {
         val base = (10f * params.weightKg) + (6.25f * params.heightCm) - (5f * params.age)
         val sexOffset = when (params.gender) {
-            com.xaniihub.app.domain.model.GenderType.MALE -> 5f
-            com.xaniihub.app.domain.model.GenderType.FEMALE -> -161f
-            com.xaniihub.app.domain.model.GenderType.OTHER -> -78f
+            GenderType.MALE -> 5f
+            GenderType.FEMALE -> -161f
+            GenderType.OTHER -> -78f
         }
         return (base + sexOffset).toInt().coerceAtLeast(900)
     }
