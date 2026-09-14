@@ -22,9 +22,16 @@ data class DashboardStats(
     val distanceKm: Float,
     val calories: Float,
     val activeMinutes: Int,
+    /**
+     * Consecutive days, ending on [date], on which the daily goal was reached. The day itself is
+     * still in progress, so it only joins the streak once its goal is met - and missing the goal
+     * by the end of a day resets the streak to zero.
+     */
     val streakDays: Int,
     val lifetimeSteps: Long,
-    val hourlySteps: List<Int> = emptyList()
+    val hourlySteps: List<Int> = emptyList(),
+    /** Longest streak on record, so the current one can be shown against a personal best. */
+    val streakBestDays: Int = 0
 ) {
     /**
      * Deliberately not capped, unlike [GoalProgress.progress]: the hero ring starts a new lap
@@ -32,6 +39,9 @@ data class DashboardStats(
      * would hide everything above the daily goal. Only the lower bound is enforced.
      */
     val progress: Float = if (dailyGoal <= 0) 0f else (steps.toFloat() / dailyGoal).coerceAtLeast(0f)
+
+    /** Whether this day counts towards the streak. */
+    val goalReached: Boolean = dailyGoal > 0 && steps >= dailyGoal
 }
 
 data class GoalConfig(

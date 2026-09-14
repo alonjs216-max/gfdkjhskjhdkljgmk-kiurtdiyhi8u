@@ -6,26 +6,29 @@ import com.xaniihub.app.domain.model.DashboardStats
 import com.xaniihub.app.domain.repository.XaniiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
-import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class HomeUiState(
     val stats: DashboardStats? = null,
     val selectedDate: LocalDate = LocalDate.now(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    /**
+     * Current calendar day, kept in the state so that [isToday] follows midnight. It used to be
+     * captured once, when the state was created, so a screen left open overnight kept claiming
+     * that yesterday was today.
+     */
+    val today: LocalDate = selectedDate
 ) {
-    val isToday: Boolean = selectedDate == LocalDate.now()
+    val isToday: Boolean get() = selectedDate == today
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -40,8 +43,11 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        observeCurrentDate()
+        // One ticker for the whole app: this screen used to run a second, slightly different copy
+        // of the same midnight loop that the repository already maintains.
+        repository.observeCurrentDate()
             .onEach { today ->
+                _uiState.update { it.copy(today = today) }
                 if (followsCurrentDay) selectedDate.value = today
             }
             .launchIn(viewModelScope)
@@ -49,31 +55,21 @@ class HomeViewModel @Inject constructor(
         selectedDate
             .flatMapLatest { date -> repository.observeDashboardStatsForDate(date) }
             .onEach { stats ->
-                _uiState.value = _uiState.value.copy(
-                    stats = stats,
-                    selectedDate = stats.date,
-                    isLoading = false
-                )
+                _uiState.update {
+                    it.copy(
+                        stats = stats,
+                        selectedDate = stats.date,
+                        isLoading = false
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }
 
     fun selectDate(date: LocalDate) {
-        followsCurrentDay = date == LocalDate.now()
+        followsCurrentDay = date == _uiState.value.today
         selectedDate.value = date
     }
-
-    private fun observeCurrentDate() = flow {
-        while (true) {
-            val today = LocalDate.now()
-            emit(today)
-            val nextMidnight = today.plusDays(1)
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-            delay((nextMidnight - System.currentTimeMillis()).coerceAtLeast(1_000L))
-        }
-    }.distinctUntilChanged()
 
     fun setGoal(value: String) {
         val parsed = value.toIntOrNull() ?: return

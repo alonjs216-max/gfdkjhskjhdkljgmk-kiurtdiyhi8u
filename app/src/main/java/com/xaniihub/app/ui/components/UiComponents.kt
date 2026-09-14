@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,15 +50,42 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xaniihub.app.localization.appLocale
 import com.xaniihub.app.localization.appText
 import java.time.LocalDate
 import kotlin.math.cos
 import kotlin.math.sin
+
+// ---------------------------------------------------------------------------------------------
+//  Theme helpers
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Specular sheen for the glass surfaces.
+ *
+ * These used to be literal `Color.White` overlays, which is only a highlight while the
+ * background is dark: on a light palette the same overlay washed the borders out until they
+ * disappeared. The direction of the sheen is now chosen from the actual background luminance,
+ * so every palette (MONO, CYAN, VIOLET, EMERALD, SUNSET) keeps a visible edge in both themes.
+ */
+private fun ColorScheme.glassHighlight(alpha: Float): Color =
+    if (background.luminance() < 0.5f) Color.White.copy(alpha = alpha)
+    else onSurface.copy(alpha = alpha * 0.55f)
+
+/** Attaches a spoken description to a canvas drawing, which is otherwise invisible to TalkBack. */
+private fun Modifier.chartSemantics(description: String?): Modifier =
+    if (description == null) this else this.semantics { contentDescription = description }
+
+/** Tabular figures: proportional digits change width and make animated counters jitter. */
+private const val TABULAR_FIGURES = "tnum"
 
 // ---------------------------------------------------------------------------------------------
 //  Ambient background
@@ -145,6 +173,7 @@ fun PremiumCard(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    val scheme = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(cornerRadius)
     Box(
         modifier = modifier
@@ -155,9 +184,9 @@ fun PremiumCard(
                 drawRoundRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.34f),
+                            scheme.glassHighlight(0.34f),
                             accent.copy(alpha = 0.22f),
-                            Color.White.copy(alpha = 0.05f)
+                            scheme.glassHighlight(0.05f)
                         )
                     ),
                     cornerRadius = CornerRadius(radius, radius),
@@ -189,13 +218,13 @@ fun GlassIconButton(
             .background(scheme.surface.copy(alpha = 0.78f))
             .background(
                 Brush.verticalGradient(
-                    listOf(Color.White.copy(alpha = 0.16f), Color.Transparent, scheme.primary.copy(alpha = 0.10f))
+                    listOf(scheme.glassHighlight(0.16f), Color.Transparent, scheme.primary.copy(alpha = 0.10f))
                 )
             )
             .drawBehind {
                 drawCircle(
                     brush = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = 0.40f), scheme.primary.copy(alpha = 0.18f), Color.Transparent)
+                        listOf(scheme.glassHighlight(0.40f), scheme.primary.copy(alpha = 0.18f), Color.Transparent)
                     ),
                     style = Stroke(width = 1.dp.toPx())
                 )
@@ -219,7 +248,9 @@ fun GradientButton(
             .shadow(14.dp, CircleShape, ambientColor = scheme.primary.copy(alpha = 0.45f), spotColor = scheme.primary.copy(alpha = 0.55f))
             .clip(CircleShape)
             .background(Brush.horizontalGradient(listOf(scheme.primary, scheme.secondary)))
-            .background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Transparent)))
+            // The gloss sits on top of the primary gradient, so it follows onPrimary rather than
+            // a fixed white that vanished on light palettes.
+            .background(Brush.verticalGradient(listOf(scheme.onPrimary.copy(alpha = 0.20f), Color.Transparent)))
             .clickable(onClick = onClick)
             .padding(horizontal = 22.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -306,7 +337,7 @@ fun MetricCard(
             Eyebrow(title, modifier = Modifier.fillMaxWidth())
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = TABULAR_FIGURES),
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 softWrap = false
@@ -327,7 +358,10 @@ fun MetricCard(
  *  - seamless three-colour sweep gradient (primary → secondary → tertiary)
  *  - bright "comet" head with a soft halo at the leading edge
  *  - a highlight travels along the arc so the ring feels alive
- *  - an orange completed-goal circle with a themed arc for each new lap
+ *  - a completed-goal circle in the palette's tertiary colour for each new lap
+ *
+ * @param contentDescription spoken summary of the ring; the whole thing is a canvas drawing and
+ * would otherwise be skipped entirely by screen readers.
  */
 @Composable
 fun GoalRing(
@@ -335,10 +369,13 @@ fun GoalRing(
     centerText: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    eyebrow: String? = null
+    eyebrow: String? = null,
+    contentDescription: String? = null
 ) {
     val scheme = MaterialTheme.colorScheme
-    val overflowColor = Color(0xFFFFC857)
+    // Was a hardcoded 0xFFFFC857: the "goal reached" state ignored the selected palette and, on
+    // a light theme, the pale yellow arc nearly vanished against the background.
+    val overflowColor = scheme.tertiary
     val safeProgress = if (progress.isFinite()) progress.coerceAtLeast(0f) else 0f
     val reached = safeProgress >= 1f
 
@@ -360,9 +397,14 @@ fun GoalRing(
     )
     val haloAlpha by animateFloatAsState(if (reached) 1f else 0f, tween(600), label = "ring_halo")
     val ringScale = if (reached) 1f + 0.012f * breathe else 1f
+    val sheenStrong = scheme.glassHighlight(0.22f)
+    val sheenCore = scheme.glassHighlight(0.92f)
 
     Box(
-        modifier = modifier.size(304.dp).scale(ringScale),
+        modifier = modifier
+            .size(304.dp)
+            .scale(ringScale)
+            .chartSemantics(contentDescription),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -436,7 +478,7 @@ fun GoalRing(
 
             rotate(degrees = -90f, pivot = center) {
                 if (hasCompletedGoal) {
-                    // Every fully completed goal is represented by the same orange base circle.
+                    // Every fully completed goal is represented by the same tertiary base circle.
                     listOf(30f to 0.07f, 18f to 0.12f, 8f to 0.20f).forEach { (extra, alpha) ->
                         drawArc(
                             color = overflowColor.copy(alpha = alpha),
@@ -458,7 +500,7 @@ fun GoalRing(
                         colors = listOf(scheme.primary, scheme.secondary, scheme.tertiary, scheme.primary),
                         center = center
                     )
-                    // Draw the current goal's themed remainder over the orange completed-goal circle.
+                    // Draw the current goal's themed remainder over the completed-goal circle.
                     listOf(30f to 0.07f, 18f to 0.12f, 8f to 0.20f).forEach { (extra, alpha) ->
                         drawArc(
                             color = scheme.primary.copy(alpha = alpha),
@@ -476,7 +518,7 @@ fun GoalRing(
                     // Specular line towards the outer edge of the arc (offset radius, same centre).
                     val specOffset = stroke * 0.22f
                     drawArc(
-                        color = Color.White.copy(alpha = 0.22f),
+                        color = sheenStrong,
                         startAngle = 0f, sweepAngle = remainderSweep, useCenter = false,
                         topLeft = Offset(arcTopLeft.x - specOffset, arcTopLeft.y - specOffset),
                         size = Size(arcSize.width + specOffset * 2f, arcSize.height + specOffset * 2f),
@@ -493,7 +535,7 @@ fun GoalRing(
                                 val segment = (end - start) * portion
                                 val segStart = start + ((end - start) - segment) / 2f
                                 drawArc(
-                                    color = Color.White.copy(alpha = alpha),
+                                    color = scheme.glassHighlight(alpha),
                                     startAngle = segStart, sweepAngle = segment, useCenter = false,
                                     topLeft = arcTopLeft, size = arcSize,
                                     style = Stroke(width = stroke * 0.85f, cap = StrokeCap.Round)
@@ -505,7 +547,7 @@ fun GoalRing(
             }
 
             if (hasCompletedGoal || remainderSweep > 0f) {
-                // Comet head follows the themed remainder, or stays orange at an exact goal boundary.
+                // Comet head follows the themed remainder, or stays tertiary at an exact goal boundary.
                 val headSweep = if (remainderSweep > 0f) remainderSweep else 360f
                 val headColor = if (remainderSweep > 0f) scheme.primary else overflowColor
                 val headRad = Math.toRadians((headSweep - 90f).toDouble())
@@ -518,7 +560,7 @@ fun GoalRing(
                     radius = stroke * 1.4f, center = head
                 )
                 drawCircle(color = headColor, radius = stroke * 0.42f, center = head)
-                drawCircle(color = Color.White.copy(alpha = 0.92f), radius = stroke * 0.24f, center = head)
+                drawCircle(color = sheenCore, radius = stroke * 0.24f, center = head)
             }
         }
 
@@ -536,7 +578,13 @@ fun GoalRing(
             }
             Text(
                 text = centerText,
-                style = MaterialTheme.typography.displayMedium.copy(fontSize = 52.sp, lineHeight = 56.sp),
+                // Tabular figures: the step counter animates digit by digit, and proportional
+                // glyph widths made the whole number shuffle sideways on every frame.
+                style = MaterialTheme.typography.displayMedium.copy(
+                    fontSize = 52.sp,
+                    lineHeight = 56.sp,
+                    fontFeatureSettings = TABULAR_FIGURES
+                ),
                 maxLines = 1,
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis,
@@ -558,13 +606,16 @@ fun GoalRing(
 /**
  * Compact bar chart drawn on a canvas: rounded gradient bars, faint guide lines, and the
  * peak bar highlighted with a glow. Bars animate in from the baseline.
+ *
+ * @param contentDescription spoken summary of the series, since a canvas exposes nothing.
  */
 @Composable
 fun TinyBarChart(
     values: List<Int>,
     modifier: Modifier = Modifier,
     height: androidx.compose.ui.unit.Dp = 110.dp,
-    highlightIndex: Int? = null
+    highlightIndex: Int? = null,
+    contentDescription: String? = null
 ) {
     if (values.isEmpty()) return
     val scheme = MaterialTheme.colorScheme
@@ -578,6 +629,7 @@ fun TinyBarChart(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
+            .chartSemantics(contentDescription)
     ) {
         val n = values.size
         val gap = if (n > 12) 3.dp.toPx() else 6.dp.toPx()
@@ -636,7 +688,11 @@ fun TinyBarChart(
 }
 
 @Composable
-fun HeatMap(values: List<Int>, modifier: Modifier = Modifier) {
+fun HeatMap(
+    values: List<Int>,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null
+) {
     val data = values.ifEmpty { List(35) { 0 } }
     val startDate = LocalDate.now().minusDays((data.size - 1).toLong())
     val normalized: List<Int?> = List(startDate.dayOfWeek.value - 1) { null } + data
@@ -645,7 +701,22 @@ fun HeatMap(values: List<Int>, modifier: Modifier = Modifier) {
     val rows = (normalized.size + columns - 1) / columns
     val weekdayLabels = appText("weekday_letters").split(",")
     val scheme = MaterialTheme.colorScheme
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    val todayOutline = scheme.glassHighlight(0.8f)
+    // Days before the app was installed are stored as zeros, so an average over the whole window
+    // would be dragged down by days the user never had a chance to walk. Only days that actually
+    // recorded steps are described.
+    val activeDays = data.count { it > 0 }
+    val activeAverage = if (activeDays == 0) 0 else data.filter { it > 0 }.sum() / activeDays
+    val integerFormat = remember(appLocale()) { java.text.NumberFormat.getIntegerInstance(appLocale()) }
+    val description = contentDescription ?: appText("heatmap_desc").format(
+        integerFormat.format(activeDays),
+        integerFormat.format(activeAverage)
+    )
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .chartSemantics(description)
+    ) {
         val gap = 6.dp
         val cell = ((maxWidth - gap * (columns - 1)) / columns).coerceAtLeast(18.dp)
         Column(verticalArrangement = Arrangement.spacedBy(gap)) {
@@ -692,7 +763,7 @@ fun HeatMap(values: List<Int>, modifier: Modifier = Modifier) {
                                         .drawBehind {
                                             if (isToday) {
                                                 drawRoundRect(
-                                                    color = Color.White.copy(alpha = 0.7f),
+                                                    color = todayOutline,
                                                     cornerRadius = CornerRadius(8.dp.toPx(), 8.dp.toPx()),
                                                     style = Stroke(width = 1.5.dp.toPx())
                                                 )
@@ -715,7 +786,10 @@ fun MiniTrendLine(
     values: List<Float>,
     modifier: Modifier = Modifier,
     xLabels: List<String> = emptyList(),
-    valueFormat: (Float) -> String = { "%.1f".format(it) }
+    // String.format without an explicit locale followed the system locale, so a Russian UI could
+    // still print a dot while the rest of the screen used a comma.
+    valueFormat: (Float) -> String = { String.format(appLocale(), "%.1f", it) },
+    contentDescription: String? = null
 ) {
     if (values.isEmpty()) return
     val scheme = MaterialTheme.colorScheme
@@ -725,7 +799,14 @@ fun MiniTrendLine(
     val max = values.maxOrNull() ?: return
     val min = values.minOrNull() ?: return
     val range = max - min
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    val description = contentDescription
+        ?: appText("weight_chart_desc").format(valueFormat(min), valueFormat(max))
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .chartSemantics(description),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Canvas(
                 modifier = Modifier
@@ -780,7 +861,8 @@ fun MiniTrendLine(
                         drawCircle(primary.copy(alpha = 0.30f), radius = pointRadius * 2.6f, center = p)
                     }
                     drawCircle(scheme.background, radius = pointRadius + 1.5.dp.toPx(), center = p)
-                    drawCircle(if (last) Color.White else primary, radius = pointRadius, center = p)
+                    // The latest point used to be pure white, which disappeared on light palettes.
+                    drawCircle(if (last) scheme.tertiary else primary, radius = pointRadius, center = p)
                 }
             }
             Column(

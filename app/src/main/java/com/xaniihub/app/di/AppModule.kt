@@ -26,7 +26,11 @@ object AppModule {
             context,
             XaniiHubDatabase::class.java,
             "xaniihub.db"
-        ).addMigrations(XaniiHubDatabase.MIGRATION_1_2, XaniiHubDatabase.MIGRATION_2_3)
+        ).addMigrations(
+            XaniiHubDatabase.MIGRATION_1_2,
+            XaniiHubDatabase.MIGRATION_2_3,
+            XaniiHubDatabase.MIGRATION_3_4
+        )
             .build()
     }
 
