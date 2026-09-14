@@ -31,10 +31,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.xaniihub.app.ui.components.HeatMap
+import com.xaniihub.app.ui.components.InteractiveBarChart
+import com.xaniihub.app.ui.components.InteractiveHeatMap
 import com.xaniihub.app.ui.components.MetricCard
 import com.xaniihub.app.ui.components.PremiumCard
-import com.xaniihub.app.ui.components.TinyBarChart
 import com.xaniihub.app.localization.AppLanguageController
 import com.xaniihub.app.localization.appLocale
 import com.xaniihub.app.localization.appText
@@ -69,6 +69,27 @@ fun AnalyticsScreen(
     val language = AppLanguageController.language
     val bestDayFormatter = remember(language) {
         DateTimeFormatter.ofPattern("d MMM yyyy", appLocale(language))
+    }
+    val barDayFormatter = remember(language) {
+        DateTimeFormatter.ofPattern("d MMM", appLocale(language))
+    }
+    val barMonthFormatter = remember(language) {
+        DateTimeFormatter.ofPattern("LLL yyyy", appLocale(language))
+    }
+    // Labels shown in the chart tooltip: hours for the day view, dates for week/month,
+    // months for the year view.
+    val chartLabels = when (selected) {
+        0 -> List(recentBars.size) { hour -> String.format(appLocale(language), "%02d:00", hour) }
+        1, 2 -> {
+            val firstDay = LocalDate.now().minusDays((recentBars.size - 1).coerceAtLeast(0).toLong())
+            List(recentBars.size) { index -> firstDay.plusDays(index.toLong()).format(barDayFormatter) }
+        }
+        else -> {
+            val currentMonth = YearMonth.from(LocalDate.now())
+            List(recentBars.size) { index ->
+                currentMonth.minusMonths((recentBars.size - 1 - index).toLong()).format(barMonthFormatter)
+            }
+        }
     }
 
     Column(
@@ -169,7 +190,10 @@ fun AnalyticsScreen(
             PremiumCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(chartTitle, fontWeight = FontWeight.SemiBold)
-                    TinyBarChart(values = recentBars.ifEmpty { List(7) { 0 } })
+                    InteractiveBarChart(
+                        values = recentBars.ifEmpty { List(7) { 0 } },
+                        labels = chartLabels
+                    )
                 }
             }
 
@@ -188,7 +212,7 @@ fun AnalyticsScreen(
             PremiumCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(appText("activity_heatmap"), fontWeight = FontWeight.SemiBold)
-                    HeatMap(values = state.heatMap.takeLast(35))
+                    InteractiveHeatMap(values = state.heatMap.takeLast(35))
                 }
             }
         }
