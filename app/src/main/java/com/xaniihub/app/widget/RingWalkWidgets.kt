@@ -123,11 +123,24 @@ object RingWalkWidgets {
                 .apply()
         }
         WidgetRepository.save(context, steps, goal, calories, distanceMeters, activeMinutes)
-        refreshAll(context)
+        refreshAllNow(context)
     }
 
-    /** Repaints every placed widget with fresh data. Safe to call from any thread. */
-    suspend fun refreshAll(context: Context) {
+    /**
+     * Repaints every placed widget with fresh data.
+     *
+     * Callers live everywhere - suspending repository code, plain UI callbacks, broadcast
+     * receivers - so this entry point is deliberately *not* suspending: it hands the work to
+     * [scope], which outlives whatever triggered the repaint. Use [refreshAllNow] when you are
+     * already in a coroutine and need to wait for the repaint to finish.
+     */
+    fun refreshAll(context: Context) {
+        val app = context.applicationContext
+        scope.launch { runCatching { refreshAllNow(app) } }
+    }
+
+    /** Suspending repaint of every placed widget. Safe to call from any dispatcher. */
+    suspend fun refreshAllNow(context: Context) {
         val manager = AppWidgetManager.getInstance(context) ?: return
         val targets = providers.mapNotNull { cls ->
             val ids = runCatching { manager.getAppWidgetIds(ComponentName(context, cls)) }.getOrNull()
@@ -142,12 +155,12 @@ object RingWalkWidgets {
         }
     }
 
-    /** Fire-and-forget variant for UI callers (palette / language / goal changes). */
+    /** Like [refreshAll], but also drops the cached bitmaps (palette / language changes). */
     fun refreshAllAsync(context: Context) {
         val app = context.applicationContext
         scope.launch {
             WidgetGraphics.clearCache()
-            runCatching { refreshAll(app) }
+            runCatching { refreshAllNow(app) }
         }
     }
 
